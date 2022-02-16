@@ -93,7 +93,7 @@ contract Calculus {
     uint coefLen = self.coefficients.length;
     int[] memory coefficients = new int[](coefLen-1);
     for (uint i=0; i<coefLen-1; i++) {
-      coefficients[0] = self.coefficients[i+1] * int(i);
+      coefficients[i] = self.coefficients[i+1] * int(i);
     } 
     return newFn(coefficients);
   }
