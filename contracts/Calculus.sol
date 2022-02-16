@@ -51,6 +51,7 @@ contract Calculus {
   }
 
   function compose(fn memory self, fn memory other) internal pure returns(fn memory) {
+    self.composedWith = new fn[](1);
     self.composedWith[0] = other; 
     return self;
   }
