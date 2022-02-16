@@ -30,16 +30,21 @@ library Calculus {
     return f;
   }
 
-  function evaluate(fn memory self, int input, uint accuracy) internal returns(int) {
+  function evaluate(fn memory self, int input, uint accuracy, uint[] calldata factorialLookupTable) internal returns(int) {
     if (self.composedWith.length > 0)
-      input = evaluate(self.composedWith[0], input, accuracy);
+      input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
     if (self.form > Form.POLYNOMIAL) {
-      return _evaluateTranscendental(self, input, accuracy);
+      return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
     return _evaluatePolynomial(self, input);
   }
 
-  function _evaluateTranscendental(fn memory self, int input, uint accuracy) internal returns(int) {
+  function evaluate(fn memory self, int input) internal pure returns(int) {
+    require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
+    return _evaluatePolynomial(self, input);
+  }
+
+  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] calldata factorialLookupTable) internal returns(int) {
     // TODO use Maclaurin series
     // TODO acknowledge sin, cos, etc.
     // TODO acknowledge polarity
@@ -107,5 +112,15 @@ library Calculus {
 
   function integrate(fn self) external returns(fn);
  */
+
+  function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
+    require(n>1, "n<=1.");
+    uint[] memory ret = new uint[](n-1);
+    ret[0] = 2;
+    for (uint i=3; i<=n; i++) {
+      ret[i-2] = i * ret[i-1]; 
+    }
+    return ret;
+  }
 
 }
