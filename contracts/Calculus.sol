@@ -3,40 +3,37 @@ pragma solidity ^0.8.0;
 
 library Calculus {
 
-  constructor() {
-    // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
+  // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
 
-    // TODO currently only for f: Z -> Z integers, extend to give f: Q -> Q the rationals
-  }
+  // TODO currently only for f: Z -> Z integers, extend to give f: Q -> Q the rationals
 
   struct fn {
     fn[] composedWith; // composition member
     Form form; // transcendental, polynomial, etc
     int polarity;
     int[] coefficients;
-    TranscendentalForm transForm;
   }
 
-  enum Form {POLYNOMIAL, TRANSCENDENTAL}
-  enum TranscendentalForm {NONE, SIN, COS, EXP} // etc
+  enum Form {POLYNOMIAL, SIN, COS, EXP} // etc
 
-  function newFn(Form form, TranscendentalForm transForm) internal pure returns(fn memory) {
+  function newFn(Form form) internal pure returns(fn memory) {
+    require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory composedWith;
     int[] memory coefficients;
-    fn memory f = fn(composedWith, form, 1, coefficients, transForm);
+    fn memory f = fn(composedWith, form, 1, coefficients);
     return f;
   }
 
   function newFn(int[] memory coefficients) internal pure returns(fn memory) {
     fn[] memory composedWith;
-    fn memory f = fn(composedWith, Form.POLYNOMIAL, 1, coefficients, TranscendentalForm.NONE);
+    fn memory f = fn(composedWith, Form.POLYNOMIAL, 1, coefficients);
     return f;
   }
 
   function evaluate(fn memory self, int input, uint accuracy) internal returns(int) {
     if (self.composedWith.length > 0)
       input = evaluate(self.composedWith[0], input, accuracy);
-    if (self.form == Form.TRANSCENDENTAL) {
+    if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy);
     } // else form == POLYNOMIAL
     return _evaluatePolynomial(self, input);
@@ -76,7 +73,7 @@ library Calculus {
 
   function _derive(fn memory self, bool isInner) internal pure returns(fn memory) {
     require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
-    if (self.form == Form.TRANSCENDENTAL) {
+    if (self.form > Form.POLYNOMIAL) {
       return _deriveTranscendental(self);
     } // else form == POLYNOMIAL
     return _derivePolynomial(self);
@@ -84,12 +81,12 @@ library Calculus {
 
   function _deriveTranscendental(fn memory self) internal pure returns(fn memory) {
     // composition is handled by _derive
-    if (self.transForm == TranscendentalForm.SIN) {
-      self.transForm = TranscendentalForm.COS;
+    if (self.form == Form.SIN) {
+      self.form = Form.COS;
       return self;
-    } else if (self.transForm == TranscendentalForm.COS) {
+    } else if (self.form == Form.COS) {
       self.polarity = -self.polarity;
-      self.transForm = TranscendentalForm.SIN;
+      self.form = Form.SIN;
       return self;
     } // ETC TODO
     // case EXP
