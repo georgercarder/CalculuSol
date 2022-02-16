@@ -5,6 +5,8 @@ library Calculus {
 
   constructor() {
     // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
+
+    // TODO currently only for f: Z -> Z integers, extend to give f: Q -> Q the rationals
   }
 
   struct fn {
