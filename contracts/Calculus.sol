@@ -1,7 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-contract Calculus {
+library Calculus {
+
+  constructor() {
+    // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
+  }
 
   struct fn {
     fn[] composedWith; // composition member
@@ -27,16 +31,17 @@ contract Calculus {
     return f;
   }
 
-  function evaluate(fn memory self, int input) internal returns(int) {
+  function evaluate(fn memory self, int input, uint accuracy) internal returns(int) {
     if (self.composedWith.length > 0)
-      input = evaluate(self.composedWith[0], input);
+      input = evaluate(self.composedWith[0], input, accuracy);
     if (self.form == Form.TRANSCENDENTAL) {
-      return _evaluateTranscendental(self, input);
+      return _evaluateTranscendental(self, input, accuracy);
     } // else form == POLYNOMIAL
     return _evaluatePolynomial(self, input);
   }
 
-  function _evaluateTranscendental(fn memory self, int input) internal returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, uint accuracy) internal returns(int) {
+    // TODO use Maclaurin series
     // TODO acknowledge sin, cos, etc.
     // TODO acknowledge polarity
   }
