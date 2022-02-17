@@ -61,6 +61,14 @@ describe("TestPow", function () {
     base = 2500; // 2.5
     power = 3;
     expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(15.625*one));
+
+    base = -9185915713;
+    power = 5;
+    one = 10000;
+
+    // note: this demonstrates that Pow is indeed an approximation, since otherwise this would equal bn(base).mul(one).pow(5); Pow is an approximation since full accuracy 1) is not necessarily needed, and would be expensive as far as gas goes.
+    expect((await testPow.testPowInteger(base, power, one, factorialLookupBound)).toString()).to.equal("-6540479364123122858837639765909738");
+
     
   });
 });
