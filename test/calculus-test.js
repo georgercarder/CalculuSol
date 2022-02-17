@@ -86,43 +86,45 @@ describe("TestCalculus", function () {
     expect(res.polarity).to.equal(polarity);
     expect(res.one).to.equal(one);
 
+    one = bn(1000000000000)
     // evaluate some values
     let piString = '3141592653589793238462643383279502884';
     let pi = bn(piString).mul(one).div(bn(10).pow(36));
     input = 0;
-    let accuracy = 6; 
+    let accuracy = 12; 
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
     expect(res).to.equal(0); // sanity
     input = pi;
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(52942); // sanity ("close" to zero ) // 0.0052942
+    console.log(one);
+    expect(res).to.equal(19433682); // sanity ("close" to zero ) // 0.000019433682
     
     input = 0;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
     expect(res).to.equal(one); // sanity
     input = pi;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(bn(-9946879)); // sanity ("close" to -1)
+    expect(res).to.equal(bn(-1000000482184)); // sanity ("close" to -1)
     let piHalves = bn(piString).div(2).mul(one).div(bn(10).pow(36));
     let threePiHalves = bn(piString).mul(3).div(2).mul(one).div(bn(10).pow(36));
     input = piHalves;
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(bn(10000005)); // sanity ("close" to one)
+    expect(res).to.equal(bn(1000000000424)); // sanity ("close" to one)
     input = threePiHalves; 
 
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    console.log(res); // FIXME should be ~ -1
-    //expect(res).to.equal(0); // sanity
+    expect(res).to.equal(-991470530935); // sanity ("close" to -1)
 
     input = piHalves;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(73); // sanity ("close" to zero)
+    expect(res).to.equal(61); // sanity ("close" to zero)
     
     input = threePiHalves; 
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    console.log(res);
-    // FIXME should be close to 0;
-    //expect(res).to.equal(one); // sanity
+    console.log({res});
+    console.log({one});
+    expect(res).to.equal(-1459195755); // sanity ("close" to 0) //  -0.001459195755
+    // TODO consider should we instead use Taylor series for better accuracy for points not close to zero?
 
     // sin
 
