@@ -47,14 +47,14 @@ library Calculus {
     return _evaluatePolynomial(self, input, one, factorialLookupTable);
   }
 
-  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) private returns(int) {
     // TODO use Maclaurin series
     // TODO acknowledge sin, cos, etc.
     // TODO acknowledge polarity
   }
 
   // currently assumes input is a rational and coefficients is an integer
-  function _evaluatePolynomial(fn memory self, int input, int one, uint[] memory factorialLookupTable) internal pure returns(int) {
+  function _evaluatePolynomial(fn memory self, int input, int one, uint[] memory factorialLookupTable) private pure returns(int) {
     int ret;
     uint coefLen = self.coefficients.length;
     for (uint i=0; i<coefLen; i++) {
@@ -80,7 +80,7 @@ library Calculus {
     factors[0] = _derive(self, !isInner); 
   }
 
-  function _derive(fn memory self, bool isInner) internal pure returns(fn memory) {
+  function _derive(fn memory self, bool isInner) private pure returns(fn memory) {
     require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
     if (self.form > Form.POLYNOMIAL) {
       return _deriveTranscendental(self);
@@ -88,7 +88,7 @@ library Calculus {
     return _derivePolynomial(self);
   }
 
-  function _deriveTranscendental(fn memory self) internal pure returns(fn memory) {
+  function _deriveTranscendental(fn memory self) private pure returns(fn memory) {
     // composition is handled by _derive
     if (self.form == Form.SIN) {
       self.form = Form.COS;
@@ -102,7 +102,7 @@ library Calculus {
     return self;
   }
 
-  function _derivePolynomial(fn memory self) internal pure returns(fn memory) {
+  function _derivePolynomial(fn memory self) private pure returns(fn memory) {
     // composition is handled by _derive
     uint coefLen = self.coefficients.length;
     int[] memory coefficients = new int[](coefLen-1);
