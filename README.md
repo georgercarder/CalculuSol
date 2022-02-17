@@ -6,7 +6,7 @@ WIP calculus library
 
 - todo is to support more transcendental functions and some degree of composition
 
-- todo is to suppor integration
+- todo is to support integration
 
 MIT License (MIT) Copyright (c) 2022 George R. Carder georgercarder@gmail.com
 
