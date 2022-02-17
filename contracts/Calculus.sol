@@ -6,8 +6,6 @@ import "./LookupTables.sol";
 
 library Calculus {
 
-  // TODO currently coefficients are assumed to be integers Z, while the indeterminate is from the rationals Q, so need to update so that coefficients are also from Q
-
   struct fn {
     fn[] composedWith; // composition member
     Form form; // transcendental, polynomial, etc
