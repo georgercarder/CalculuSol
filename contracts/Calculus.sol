@@ -36,7 +36,7 @@ library Calculus {
     return fn(composedWith, Form.POLYNOMIAL, polarity, coefficients);
   }
 
-  function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
+  function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
       input = evaluate(self.composedWith[0], input, one, accuracy, factorialLookupTable);
     if (self.form > Form.POLYNOMIAL) {

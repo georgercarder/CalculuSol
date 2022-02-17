@@ -4,11 +4,9 @@ pragma solidity ^0.8.0;
 library LookupTables {
 
   function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
-    require(n>1, "n<=1.");
     uint[] memory ret = new uint[](n+1);
     ret[0] = 1;
-    ret[1] = 1;
-    for (uint i=2; i<=n; i++) {
+    for (uint i=1; i<=n; i++) {
       ret[i] = i * ret[i-1]; 
     }
     return ret;
