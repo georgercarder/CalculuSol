@@ -22,4 +22,10 @@ contract TestCalculus {
     return Calculus.evaluate(f, input, one, 0, ft); // accuracy=0 for polynomial
   }
 
+  function testPolynomialDifferentiation(int[] calldata coefficients) external pure returns(strippedFn memory) {
+    Calculus.fn memory f = Calculus.newFn(coefficients);
+    Calculus.fn[] memory df = Calculus.differentiate(f);
+    return strippedFn(df[0].form, df[0].polarity, df[0].coefficients);
+  }
+
 }

@@ -10,7 +10,7 @@ describe("TestCalculus", function () {
     const TestCalculus = await ethers.getContractFactory("TestCalculus");
     const testCalculus = await TestCalculus.deploy();
     await testCalculus.deployed();
-    
+     
     let coefficients = [1, 20, 3, 40];
     let res = await testCalculus.testPolynomial(coefficients);
     let expected = [0, bn(1), bn(1), bn(20), bn(3), bn(40)];
@@ -33,6 +33,15 @@ describe("TestCalculus", function () {
     one = 10000000;
     expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(757)); // "close" according to wolfram alpha 757.593
     // TODO figure out how to increase accuracy 
+    
+    // check differentiation
+    expected = [0, bn(1), bn(20), bn(6), bn(120)];
+    res = await testCalculus.testPolynomialDifferentiation(coefficients);
+    expect(res.form).to.equal(expected[0]);
+    expect(res.polarity).to.equal(expected[1]);
+    for (let i=0; i<res.coefficients.length; i++) {
+      expect(res.coefficients[i]).to.equal(expected[i+2]);
+    }
      
   });
 });

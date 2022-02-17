@@ -93,27 +93,27 @@ library Calculus {
     return self;
   }
 
-  function derive(fn memory self) internal pure returns(fn[] memory factors) {
+  function differentiate(fn memory self) internal pure returns(fn[] memory factors) {
     factors = new fn[](1);
     bool isInner=true;
     if (self.composedWith.length > 0) {
       factors = new fn[](2);
       isInner=true;
-      factors[1] = _derive(self.composedWith[0], isInner);
+      factors[1] = _differentiate(self.composedWith[0], isInner);
     }
-    factors[0] = _derive(self, !isInner); 
+    factors[0] = _differentiate(self, !isInner); 
   }
 
-  function _derive(fn memory self, bool isInner) private pure returns(fn memory) {
+  function _differentiate(fn memory self, bool isInner) private pure returns(fn memory) {
     require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
     if (self.form > Form.POLYNOMIAL) {
-      return _deriveTranscendental(self);
+      return _differentiateTranscendental(self);
     } // else form == POLYNOMIAL
-    return _derivePolynomial(self);
+    return _differentiatePolynomial(self);
   }
 
-  function _deriveTranscendental(fn memory self) private pure returns(fn memory) {
-    // composition is handled by _derive
+  function _differentiateTranscendental(fn memory self) private pure returns(fn memory) {
+    // composition is handled by _differentiate
     if (self.form == Form.SIN) {
       self.form = Form.COS;
       return self;
@@ -126,12 +126,12 @@ library Calculus {
     return self;
   }
 
-  function _derivePolynomial(fn memory self) private pure returns(fn memory) {
-    // composition is handled by _derive
+  function _differentiatePolynomial(fn memory self) private pure returns(fn memory) {
+    // composition is handled by _differentiate
     uint coefLen = self.coefficients.length;
     int[] memory coefficients = new int[](coefLen-1);
     for (uint i=0; i<coefLen-1; i++) {
-      coefficients[i] = self.coefficients[i+1] * int(i);
+      coefficients[i] = self.coefficients[i+1] * int(i+1);
     } 
     return newFn(coefficients);
   }
