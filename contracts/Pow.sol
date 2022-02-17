@@ -7,7 +7,7 @@ library Pow {
     return (x>0) ? x : -x;
   }
 
-  function pow(int base, uint power, int one, uint[] calldata factorialLookupTable) internal returns(int ret) {
+  function pow(int base, uint power, int one, uint[] memory factorialLookupTable) internal pure returns(int ret) {
     require(factorialLookupTable.length+1 >= power, "factorialLookupTable is lacking."); // TODO double check this indexing wrt ( n k ) (choose)
     int sign = (base > int(0)) ? int(1) : int(-1);
     int absBase = abs(base);
@@ -20,7 +20,7 @@ library Pow {
 
   // sum (0,n) i : (n i) * a^(n-i) * b^i
 
-  function _lesserTermsOfBinomialExpansion(int sign, int absInteger, int absFraction, uint power, int one, uint[] calldata factorialLookupTable) private returns(int ret) {
+  function _lesserTermsOfBinomialExpansion(int sign, int absInteger, int absFraction, uint power, int one, uint[] memory factorialLookupTable) private pure returns(int ret) {
     int pf; // powFraction
     for (uint i=1; i<=power; i++) {
       pf = _powFraction(absFraction, i, one); // this has factor of one
@@ -31,12 +31,12 @@ library Pow {
     }
   }
 
-  function nChooseK(uint n, uint k, uint[] calldata factorialLookupTable) internal pure returns(uint ret) {
+  function nChooseK(uint n, uint k, uint[] memory factorialLookupTable) internal pure returns(uint ret) {
     // n!/(k!*(n-k)!)
     return factorialLookupTable[n-2] / (factorialLookupTable[k-2] * factorialLookupTable[n-k-2]);
   }
 
-  function _powFraction(int absBase, uint power, int one) private returns(int) {
+  function _powFraction(int absBase, uint power, int one) private pure returns(int) {
     if (power == 1) return absBase;
     return absBase * _powFraction(absBase, power-1, one) / one; 
   }
@@ -57,6 +57,5 @@ library Pow {
     }
     return ret;
   }
-
 
 }
