@@ -112,15 +112,4 @@ library Calculus {
 
   function integrate(fn self) external returns(fn);
  */
-
-  function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
-    require(n>1, "n<=1.");
-    uint[] memory ret = new uint[](n-1);
-    ret[0] = 2;
-    for (uint i=3; i<=n; i++) {
-      ret[i-2] = i * ret[i-1]; 
-    }
-    return ret;
-  }
-
 }

@@ -15,7 +15,7 @@ library Pow {
     int fraction = absBase % one;
     int firstTermOfBinomialExpansion = _sign(sign, power) * (integer ** power) * one;
     ret += firstTermOfBinomialExpansion;
-    ret += _lesserTermsOfBinomialExpansion(sign, integer, fraction, power, one, factorialLookupTable);
+    if (fraction != 0) ret += _lesserTermsOfBinomialExpansion(sign, integer, fraction, power, one, factorialLookupTable);
   }
 
   // sum (0,n) i : (n i) * a^(n-i) * b^i
@@ -47,4 +47,16 @@ library Pow {
     }
     return (power%2==0) ? int(1) : int(-1);
   }
+
+  function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
+    require(n>1, "n<=1.");
+    uint[] memory ret = new uint[](n-1);
+    ret[0] = 2;
+    for (uint i=3; i<=n; i++) {
+      ret[i-2] = i * ret[i-3]; 
+    }
+    return ret;
+  }
+
+
 }
