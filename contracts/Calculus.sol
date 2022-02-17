@@ -63,7 +63,7 @@ library Calculus {
 
   // FIXME handle LN
   function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
-    int[] memory coefficients = new int[](accuracy+1);
+    int[] memory coefficients = new int[](2*accuracy+1);
     uint startIdx;
     uint idxGap=1;
     int unit=1;
@@ -79,13 +79,16 @@ library Calculus {
     }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
     int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
     uint idx;
+    uint n;
     if (startIdx==1) {
       coefficients[idx]=0; 
       idx++;
     }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**idx) * factorialReciprocalsLookupTable[i]; 
-      idx++;
+      coefficients[idx] = (unit**n) * factorialReciprocalsLookupTable[i]; 
+      n++;
+      coefficients[idx+1] = 0;
+      idx+=2;
     }
     // FIXME.. think this step is broken until update whole library to support coefficients in Q
     return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
