@@ -72,7 +72,7 @@ library Calculus {
       coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
       idx++;
     }
-    return evaluate(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
+    return _evaluatePolynomial(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
   }
 
   // currently assumes input is a rational and coefficients is an integer
