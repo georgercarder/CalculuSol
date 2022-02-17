@@ -81,8 +81,9 @@ library Calculus {
     int ret;
     uint coefLen = self.coefficients.length;
     for (uint i=0; i<coefLen; i++) {
-      ret += self.coefficients[i] * Pow.pow(input, i, one, factorialLookupTable) / one;
+      ret += self.coefficients[i] * Pow.pow(input, i, one, factorialLookupTable);
     }
+    ret = ret / one;
     return self.polarity * ret;
   }
 

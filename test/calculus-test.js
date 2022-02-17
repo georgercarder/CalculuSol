@@ -31,7 +31,7 @@ describe("TestCalculus", function () {
     input = 25777000; // input is a rational
     // 2.5777
     one = 10000000;
-    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(756)); // "close" according to wolfram alpha 757.593
+    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(757)); // "close" according to wolfram alpha 757.593
     // TODO figure out how to increase accuracy 
      
   });
