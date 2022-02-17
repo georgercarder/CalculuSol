@@ -102,6 +102,28 @@ describe("TestCalculus", function () {
     input = pi;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
     expect(res).to.equal(one); // sanity
+    
+    let PIHalves = PI/2;
+    let piHalves = Math.floor(PIHalves*parseInt(one));
+    console.log(piHalves);
+    input = piHalves;
+    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    console.log("res", res);
+    console.log("one", one);
+    console.log("input", input);
+    //expect(res).to.equal(one); // sanity
+    /*input = pi; // TODO 3pi/2
+    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    expect(res).to.equal(0); // sanity
+    */
+    /*input = piHalves;
+    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(0); // sanity
+    */
+    /*input = pi; // TODO 3pi/2
+    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(one); // sanity
+    // */
 
     // sin
 

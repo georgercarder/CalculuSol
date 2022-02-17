@@ -69,7 +69,7 @@ library Calculus {
     int unit=1;
     if (self.form != Form.EXP) { // then is sin or cos
       uint piNormalized = PI * self.one / (10**36);
-      input = (input % int(piNormalized)) * int(self.one); // we embrace the periodicity
+      input = input % int(piNormalized); // we embrace the periodicity
       accuracy = 2*accuracy; 
       startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;
@@ -84,7 +84,7 @@ library Calculus {
       idx++;
     }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
+      coefficients[idx] = (unit**idx) * factorialReciprocalsLookupTable[i]; 
       idx++;
     }
     // FIXME.. think this step is broken until update whole library to support coefficients in Q
