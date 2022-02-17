@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Pow.sol";
+import "./LookupTables.sol";
 
 library Calculus {
 
@@ -13,6 +14,8 @@ library Calculus {
     int polarity;
     int[] coefficients;
   }
+
+  uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
   enum Form {POLYNOMIAL, SIN, COS, EXP} // etc
 
@@ -26,6 +29,11 @@ library Calculus {
   function newFn(int[] memory coefficients) internal pure returns(fn memory) {
     fn[] memory composedWith;
     return fn(composedWith, Form.POLYNOMIAL, 1, coefficients);
+  }
+
+  function newFn(int[] memory coefficients, int polarity) internal pure returns(fn memory) {
+    fn[] memory composedWith;
+    return fn(composedWith, Form.POLYNOMIAL, polarity, coefficients);
   }
 
   function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
@@ -43,10 +51,28 @@ library Calculus {
     return _evaluatePolynomial(self, input, one, factorialLookupTable);
   }
 
-  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) private returns(int) {
-    // TODO use Maclaurin series
-    // TODO acknowledge sin, cos, etc.
-    // TODO acknowledge polarity
+  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
+    int[] memory coefficients = new int[](accuracy);
+    uint startIdx;
+    uint idxGap=1;
+    int unit=1;
+    if (self.form != Form.EXP) { // then is sin or cos
+      uint piNormalized = PI * uint(one) / (10**36);
+      input = (input % int(piNormalized)) * one; // we embrace the periodicity
+      accuracy = 2*accuracy; 
+      if (self.form==Form.SIN) startIdx=1;
+      idxGap=2;
+      unit=-1;
+    } /* else if (self.form == Form.EXP) {
+      unit=1;
+    }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
+    int[] memory tmpCoefficients = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, uint(one));
+    uint idx;
+    for (uint i=startIdx; i<accuracy; i+=idxGap) {
+      coefficients[idx] = (unit**i) * tmpCoefficients[i]; 
+      idx++;
+    }
+    return evaluate(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
   }
 
   // currently assumes input is a rational and coefficients is an integer

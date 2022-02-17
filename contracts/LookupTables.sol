@@ -14,11 +14,11 @@ library LookupTables {
     return ret;
   }
 
-  function buildFactorialReciprocalsLookupTable(uint[] memory factorialLookupTable, uint one) internal pure returns(uint[] memory ret) {
-    ret = new uint[](factorialLookupTable.length); 
+  function buildFactorialReciprocalsLookupTable(uint[] memory factorialLookupTable, uint one) internal pure returns(int[] memory ret) {
+    ret = new int[](factorialLookupTable.length); 
     uint len = factorialLookupTable.length;
     for (uint i=0; i<len; i++) {
-      ret[i] = one / factorialLookupTable[i]; // no normalizing by one since factorialLookupTable is not scaled by one
+      ret[i] = int(one / factorialLookupTable[i]); // no normalizing by one since factorialLookupTable is not scaled by one
     }
     return ret;
   }
