@@ -68,8 +68,8 @@ library Calculus {
     uint idxGap=1;
     int unit=1;
     if (self.form != Form.EXP) { // then is sin or cos
-      uint piNormalized = PI * self.one / (10**36);
-      input = input % int(piNormalized); // we embrace the periodicity
+      uint TwoPiNormalized = 2 * PI * self.one / (10**36);
+      input = input % int(TwoPiNormalized); // we embrace the periodicity
       accuracy = 2*accuracy; 
       startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;

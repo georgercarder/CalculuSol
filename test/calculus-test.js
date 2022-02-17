@@ -87,43 +87,42 @@ describe("TestCalculus", function () {
     expect(res.one).to.equal(one);
 
     // evaluate some values
-    let PI = 3.14159265358979;
-    let pi = Math.floor(PI*parseInt(one));
+    let piString = '3141592653589793238462643383279502884';
+    let pi = bn(piString).mul(one).div(bn(10).pow(36));
     input = 0;
     let accuracy = 6; 
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
     expect(res).to.equal(0); // sanity
     input = pi;
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(0); // sanity
+    expect(res).to.equal(52942); // sanity ("close" to zero ) // 0.0052942
+    
     input = 0;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
     expect(res).to.equal(one); // sanity
     input = pi;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(one); // sanity
-    
-    let PIHalves = PI/2;
-    let piHalves = Math.floor(PIHalves*parseInt(one));
-    console.log(piHalves);
+    expect(res).to.equal(bn(-9946879)); // sanity ("close" to -1)
+    let piHalves = bn(piString).div(2).mul(one).div(bn(10).pow(36));
+    let threePiHalves = bn(piString).mul(3).div(2).mul(one).div(bn(10).pow(36));
     input = piHalves;
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    console.log("res", res);
-    console.log("one", one);
-    console.log("input", input);
-    //expect(res).to.equal(one); // sanity
-    /*input = pi; // TODO 3pi/2
+    expect(res).to.equal(bn(10000005)); // sanity ("close" to one)
+    input = threePiHalves; 
+
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(0); // sanity
-    */
-    /*input = piHalves;
+    console.log(res); // FIXME should be ~ -1
+    //expect(res).to.equal(0); // sanity
+
+    input = piHalves;
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(0); // sanity
-    */
-    /*input = pi; // TODO 3pi/2
+    expect(res).to.equal(73); // sanity ("close" to zero)
+    
+    input = threePiHalves; 
     res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(one); // sanity
-    // */
+    console.log(res);
+    // FIXME should be close to 0;
+    //expect(res).to.equal(one); // sanity
 
     // sin
 
