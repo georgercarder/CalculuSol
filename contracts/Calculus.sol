@@ -1,11 +1,13 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import "./Pow.sol";
+
 library Calculus {
 
   // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
 
-  // TODO currently only for f: Z -> Z integers, extend to give f: Q -> Q the rationals
+  // TODO currently coefficients are assumed to be integers Z, while the indeterminate is from the rationals Q, so need to update so that coefficients are also from Q
 
   struct fn {
     fn[] composedWith; // composition member
@@ -30,31 +32,33 @@ library Calculus {
     return f;
   }
 
-  function evaluate(fn memory self, int input, uint accuracy, uint[] calldata factorialLookupTable) internal returns(int) {
+  function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
     if (self.composedWith.length > 0)
-      input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
+      input = evaluate(self.composedWith[0], input, one, accuracy, factorialLookupTable);
     if (self.form > Form.POLYNOMIAL) {
-      return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
+      return _evaluateTranscendental(self, input, one, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
-    return _evaluatePolynomial(self, input);
+    return _evaluatePolynomial(self, input, one, factorialLookupTable);
   }
 
-  function evaluate(fn memory self, int input) internal pure returns(int) {
+  // evaluates polynomial having integer coefficients and rational input
+  function evaluate(fn memory self, int input, int one, uint[] memory factorialLookupTable) internal pure returns(int) {
     require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
-    return _evaluatePolynomial(self, input);
+    return _evaluatePolynomial(self, input, one, factorialLookupTable);
   }
 
-  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] calldata factorialLookupTable) internal returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
     // TODO use Maclaurin series
     // TODO acknowledge sin, cos, etc.
     // TODO acknowledge polarity
   }
 
-  function _evaluatePolynomial(fn memory self, int input) internal pure returns(int) {
+  // currently assumes input is a rational and coefficients is an integer
+  function _evaluatePolynomial(fn memory self, int input, int one, uint[] memory factorialLookupTable) internal pure returns(int) {
     int ret;
     uint coefLen = self.coefficients.length;
     for (uint i=0; i<coefLen; i++) {
-      ret += self.coefficients[i] * (input ** i);
+      ret += self.coefficients[i] * Pow.pow(input, i, one, factorialLookupTable) / one;
     }
     return self.polarity * ret;
   }
