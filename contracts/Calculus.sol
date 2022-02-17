@@ -85,6 +85,7 @@ library Calculus {
       startIdx = 1;
       idxGap=2;
       unit=-1;
+      // TODO update unit test for LN
     }
     int[] memory lookupTable;
     if (qt == QuotientType.FACTORIAL) {
@@ -115,7 +116,7 @@ library Calculus {
       ret = input % int(TwoPiNormalized); // we embrace the periodicity
   }
 
-  // currently assumes input is a rational and coefficients is an integer
+  // assumes input, and coefficients are rationals Q
   function _evaluatePolynomial(fn memory self, int input, uint[] memory factorialLookupTable) private pure returns(int) {
     int ret;
     uint coefLen = self.coefficients.length;
