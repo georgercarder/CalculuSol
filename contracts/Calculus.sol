@@ -18,8 +18,9 @@ library Calculus {
 
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
-  enum Form {POLYNOMIAL, SIN, COS, EXP} // etc
+  enum Form {POLYNOMIAL, SIN, COS, EXP, LN} // etc
 
+  // transcendental
   function newFn(Form form, uint one) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory composedWith;
@@ -27,6 +28,14 @@ library Calculus {
     return fn(composedWith, form, 1, coefficients, one);
   }
 
+  function newFn(Form form, uint one, int polarity) internal pure returns(fn memory) {
+    require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
+    fn[] memory composedWith;
+    int[] memory coefficients;
+    return fn(composedWith, form, polarity, coefficients, one);
+  }
+
+  // polynomial
   function newFn(int[] memory coefficients, uint one) internal pure returns(fn memory) {
     fn[] memory composedWith;
     return fn(composedWith, Form.POLYNOMIAL, 1, coefficients, one);
@@ -52,6 +61,7 @@ library Calculus {
     return _evaluatePolynomial(self, input, factorialLookupTable);
   }
 
+  // FIXME handle LN
   function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
     int[] memory coefficients = new int[](accuracy);
     uint startIdx;
@@ -113,6 +123,7 @@ library Calculus {
     return _differentiatePolynomial(self);
   }
 
+  // FIXME handle LN
   function _differentiateTranscendental(fn memory self) private pure returns(fn memory) {
     // composition is handled by _differentiate
     if (self.form == Form.SIN) {

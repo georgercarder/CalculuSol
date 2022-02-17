@@ -10,16 +10,19 @@ describe("TestCalculus", function () {
     const TestCalculus = await ethers.getContractFactory("TestCalculus");
     const testCalculus = await TestCalculus.deploy();
     await testCalculus.deployed();
+
+    // polynomials
      
     let coefficients = [1, 20, 3, 40];
     let one = 1;
     let res = await testCalculus.testPolynomial(coefficients, one);
-    let expected = [0, bn(1), bn(1), bn(20), bn(3), bn(40)];
+    let expected = [0, bn(1), bn(1), bn(20), bn(3), bn(40), one];
     expect(res.form).to.equal(expected[0]);
     expect(res.polarity).to.equal(expected[1]);
-    for (let i=0; i<res.coefficients.length; i++) {
+    for (let i=0; i<res.coefficients.length-1; i++) {
       expect(res.coefficients[i]).to.equal(expected[i+2]);
     }
+    expect(res.one).to.equal(expected[expected.length-1]);
 
     let input = 2; // input is an integer
     let evaluatedPolynomial = bn(0);//bn(coefficients[0]);
@@ -30,20 +33,73 @@ describe("TestCalculus", function () {
 
     input = 25777000; // input is a rational
     // 2.5777
-    one = 10000000;
+    one = bn(10000000);
     for (let i=0; i<coefficients.length; i++) {
-      coefficients[i] = coefficients[i]*one;
+      coefficients[i] = bn(coefficients[i]).mul(one);
     }
     expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(7575925356)); // "close" according to wolfram alpha 757.593
     
     // check differentiation
-    /*expected = [0, bn(1), bn(20), bn(6), bn(120)];
+    expected = [0, bn(1), bn(20), bn(6), bn(120), one];
+    for (let i=2; i<expected.length-1; i++) {
+      expected[i] = expected[i].mul(one);
+    }
+
     res = await testCalculus.testPolynomialDifferentiation(coefficients, one);
     expect(res.form).to.equal(expected[0]);
     expect(res.polarity).to.equal(expected[1]);
-    for (let i=0; i<res.coefficients.length; i++) {
+    for (let i=0; i<res.coefficients.length-1; i++) {
       expect(res.coefficients[i]).to.equal(expected[i+2]);
     }
-    */
+    expect(res.one).to.equal(expected[expected.length-1]);
+
+    // transcendentals
+
+    let FORM = {POLYNOMIAL:0, SIN:1, COS:2, EXP:3} // etc
+    let polarity = 1;
+    let differentiate = false;
+
+    res = await testCalculus.testTrigDifferentiation(FORM.SIN, one, polarity, differentiate);
+    expect(res.form).to.equal(FORM.SIN);
+    expect(res.polarity).to.equal(polarity);
+    expect(res.one).to.equal(one);
+
+    // differentiation ensuring sin -> cos -> -sin -> -cos ~ Z_4
+    differentiate = true;
+    res = await testCalculus.testTrigDifferentiation(FORM.SIN, one, polarity, differentiate);
+    expect(res.form).to.equal(FORM.COS);
+    expect(res.polarity).to.equal(polarity);
+    expect(res.one).to.equal(one);
+
+    res = await testCalculus.testTrigDifferentiation(FORM.COS, one, polarity, differentiate);
+    expect(res.form).to.equal(FORM.SIN);
+    expect(res.polarity).to.equal(-polarity);
+    expect(res.one).to.equal(one);
+
+    res = await testCalculus.testTrigDifferentiation(FORM.SIN, one, -polarity, differentiate);
+    expect(res.form).to.equal(FORM.COS);
+    expect(res.polarity).to.equal(-polarity);
+    expect(res.one).to.equal(one);
+
+    res = await testCalculus.testTrigDifferentiation(FORM.COS, one, -polarity, differentiate);
+    expect(res.form).to.equal(FORM.SIN);
+    expect(res.polarity).to.equal(polarity);
+    expect(res.one).to.equal(one);
+
+    // TODO evaluate some values
+    let accuracy = 6; 
+    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    // FIXME below shows scaling of transcendental eval is off
+    console.log(res);
+    console.log(one);
+
+
+    // sin
+
+    // cos
+
+    // TODO evaluate some values
+    
+    
   });
 });
