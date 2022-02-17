@@ -60,7 +60,7 @@ library Calculus {
       uint piNormalized = PI * uint(one) / (10**36);
       input = (input % int(piNormalized)) * one; // we embrace the periodicity
       accuracy = 2*accuracy; 
-      if (self.form==Form.SIN) startIdx=1;
+      startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;
       unit=-1;
     } /* else if (self.form == Form.EXP) {
@@ -72,6 +72,7 @@ library Calculus {
       coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
       idx++;
     }
+    // FIXME.. think this step is broken until update whole library to support coefficients in Q
     return _evaluatePolynomial(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
   }
 
@@ -119,7 +120,7 @@ library Calculus {
       self.polarity = -self.polarity;
       self.form = Form.SIN;
       return self;
-    } // ETC TODO
+    } // ETC
     // case EXP
     return self;
   }
