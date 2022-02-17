@@ -86,13 +86,22 @@ describe("TestCalculus", function () {
     expect(res.polarity).to.equal(polarity);
     expect(res.one).to.equal(one);
 
-    // TODO evaluate some values
+    // evaluate some values
+    let PI = 3.14159265358979;
+    let pi = Math.floor(PI*parseInt(one));
+    input = 0;
     let accuracy = 6; 
     res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    // FIXME below shows scaling of transcendental eval is off
-    console.log(res);
-    console.log(one);
-
+    expect(res).to.equal(0); // sanity
+    input = pi;
+    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    expect(res).to.equal(0); // sanity
+    input = 0;
+    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(one); // sanity
+    input = pi;
+    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(one); // sanity
 
     // sin
 

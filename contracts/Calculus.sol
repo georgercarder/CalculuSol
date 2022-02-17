@@ -63,7 +63,7 @@ library Calculus {
 
   // FIXME handle LN
   function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
-    int[] memory coefficients = new int[](accuracy);
+    int[] memory coefficients = new int[](accuracy+1);
     uint startIdx;
     uint idxGap=1;
     int unit=1;
@@ -79,6 +79,10 @@ library Calculus {
     }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
     int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
     uint idx;
+    if (startIdx==1) {
+      coefficients[idx]=0; 
+      idx++;
+    }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
       coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
       idx++;
