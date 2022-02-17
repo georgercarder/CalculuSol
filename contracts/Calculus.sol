@@ -61,22 +61,42 @@ library Calculus {
     return _evaluatePolynomial(self, input, factorialLookupTable);
   }
 
-  // FIXME handle LN
+  enum QuotientType {NONE, FACTORIAL, FACTOR}
+
   function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
     int[] memory coefficients = new int[](2*accuracy+1);
+    QuotientType qt = QuotientType.NONE;
     uint startIdx;
     uint idxGap=1;
     int unit=1;
     if (self.form != Form.EXP) { // then is sin or cos
+      qt = QuotientType.FACTORIAL;
       input = _putInNeighborhoodOfZero(input, self.one);
       accuracy = 2*accuracy; 
       startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;
       unit=-1;
-    } /* else if (self.form == Form.EXP) {
-      unit=1;
-    }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
-    int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
+    } else if (self.form == Form.EXP) {
+      qt = QuotientType.FACTORIAL;
+      // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
+    } else if (self.form == Form.LN) {
+      qt = QuotientType.FACTOR; 
+      input = input - int(self.one);
+      require(Pow.abs(input) < int(self.one), "input out of domain.");
+      accuracy = 2*accuracy;
+      startIdx = 1;
+      idxGap=2;
+      unit=-1;
+    }
+    int[] memory lookupTable;
+    if (qt == QuotientType.FACTORIAL) {
+      lookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
+    } else if (qt == QuotientType.FACTOR) {
+      lookupTable = LookupTables.buildFactorReciprocalsLookupTable(self.one, accuracy);
+    } else {  // qt == QuotientType.NONE
+      //  TODO
+    }
+    { // stack too deep
     uint idx;
     uint n;
     if (startIdx==1) {
@@ -84,9 +104,10 @@ library Calculus {
       idx++;
     }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**n) * factorialReciprocalsLookupTable[i]; 
+      coefficients[idx] = (unit**n) * lookupTable[i]; 
       n++;
       idx+=idxGap;
+    }
     }
     return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
   }
