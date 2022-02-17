@@ -68,8 +68,7 @@ library Calculus {
     uint idxGap=1;
     int unit=1;
     if (self.form != Form.EXP) { // then is sin or cos
-      uint TwoPiNormalized = 2 * PI * self.one / (10**36);
-      input = input % int(TwoPiNormalized); // we embrace the periodicity
+      input = _putInNeighborhoodOfZero(input, self.one);
       accuracy = 2*accuracy; 
       startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;
@@ -89,8 +88,12 @@ library Calculus {
       n++;
       idx+=idxGap;
     }
-    // FIXME.. think this step is broken until update whole library to support coefficients in Q
     return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
+  }
+
+  function _putInNeighborhoodOfZero(int input, uint one) private pure returns(int ret) {
+      uint TwoPiNormalized = 2 * PI * one / (10**36);
+      ret = input % int(TwoPiNormalized); // we embrace the periodicity
   }
 
   // currently assumes input is a rational and coefficients is an integer

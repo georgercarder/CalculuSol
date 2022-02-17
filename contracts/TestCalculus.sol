@@ -36,7 +36,7 @@ contract TestCalculus {
     return strippedFn(df[0].form, df[0].polarity, df[0].coefficients, df[0].one);
   }
 
-  function testTrigEvaluation(Calculus.Form form, uint one, int polarity, int input, uint accuracy) external pure returns(int) {
+  function testTranscendentalEvaluation(Calculus.Form form, uint one, int polarity, int input, uint accuracy) external pure returns(int) {
     Calculus.fn memory f = Calculus.newFn(form, one, polarity); 
     uint[] memory ft = LookupTables.buildFactorialLookupTable(2*accuracy);
     return Calculus.evaluate(f, input, accuracy, ft);

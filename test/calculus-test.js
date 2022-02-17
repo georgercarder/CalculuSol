@@ -86,52 +86,55 @@ describe("TestCalculus", function () {
     expect(res.polarity).to.equal(polarity);
     expect(res.one).to.equal(one);
 
-    one = bn(1000000000000)
+    one = bn(10).pow(18)
     // evaluate some values
     let piString = '3141592653589793238462643383279502884';
     let pi = bn(piString).mul(one).div(bn(10).pow(36));
     input = 0;
     let accuracy = 12; 
-    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, polarity, input, accuracy);
     expect(res).to.equal(0); // sanity
     input = pi;
-    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    console.log(one);
-    expect(res).to.equal(19433682); // sanity ("close" to zero ) // 0.000019433682
-    
+    res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    expect(res).to.equal(-32594034); // sanity ("close" to zero ) // -0.000000000032594034    
     input = 0;
-    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
+    res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, polarity, input, accuracy);
     expect(res).to.equal(one); // sanity
     input = pi;
-    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(bn(-1000000482184)); // sanity ("close" to -1)
+    res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(bn("-1000000003423230545")); // sanity ("close" to -1)
     let piHalves = bn(piString).div(2).mul(one).div(bn(10).pow(36));
     let threePiHalves = bn(piString).mul(3).div(2).mul(one).div(bn(10).pow(36));
     input = piHalves;
-    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(bn(1000000000424)); // sanity ("close" to one)
+    res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    expect(res).to.equal(bn("1000000000000000166")); // sanity ("close" to one)
     input = threePiHalves; 
 
-    res = await testCalculus.testTrigEvaluation(FORM.SIN, one, polarity, input, accuracy);
-    expect(res).to.equal(-991470530935); // sanity ("close" to -1)
+    res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, polarity, input, accuracy);
+    expect(res).to.equal("-1000001333538651278"); // sanity ("close" to -1)
+    //                     -682941969615792847 513603717600817265
 
     input = piHalves;
-    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    expect(res).to.equal(61); // sanity ("close" to zero)
+    res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal(-3598); // sanity ("close" to zero)
     
     input = threePiHalves; 
-    res = await testCalculus.testTrigEvaluation(FORM.COS, one, polarity, input, accuracy);
-    console.log({res});
-    console.log({one});
-    expect(res).to.equal(-1459195755); // sanity ("close" to 0) //  -0.001459195755
-    // TODO consider should we instead use Taylor series for better accuracy for points not close to zero?
-
-    // sin
-
-    // cos
-
-    // TODO evaluate some values
+    res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, polarity, input, accuracy);
+    expect(res).to.equal("-11224909331762"); // sanity ("close" to 0) //  -0.000011224909331762
     
+    // TODO find methods to get better accuracy
+
+    // TODO evaluate more values pi/2 pi/3 etc
+    
+    // e^x
+    input = 0;
+    res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, polarity, input, accuracy);
+    expect(res).to.equal(one);
+
+    input = one;
+    let EApproximate = bn('2718281826198492860');
+    res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, polarity, input, accuracy);
+    expect(res).to.equal(EApproximate);
     
   });
 });
