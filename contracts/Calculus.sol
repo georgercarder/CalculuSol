@@ -13,52 +13,53 @@ library Calculus {
     Form form; // transcendental, polynomial, etc
     int polarity;
     int[] coefficients;
+    uint one;
   }
 
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
   enum Form {POLYNOMIAL, SIN, COS, EXP} // etc
 
-  function newFn(Form form) internal pure returns(fn memory) {
+  function newFn(Form form, uint one) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory composedWith;
     int[] memory coefficients;
-    return fn(composedWith, form, 1, coefficients);
+    return fn(composedWith, form, 1, coefficients, one);
   }
 
-  function newFn(int[] memory coefficients) internal pure returns(fn memory) {
+  function newFn(int[] memory coefficients, uint one) internal pure returns(fn memory) {
     fn[] memory composedWith;
-    return fn(composedWith, Form.POLYNOMIAL, 1, coefficients);
+    return fn(composedWith, Form.POLYNOMIAL, 1, coefficients, one);
   }
 
-  function newFn(int[] memory coefficients, int polarity) internal pure returns(fn memory) {
+  function newFn(int[] memory coefficients, int polarity, uint one) internal pure returns(fn memory) {
     fn[] memory composedWith;
-    return fn(composedWith, Form.POLYNOMIAL, polarity, coefficients);
+    return fn(composedWith, Form.POLYNOMIAL, polarity, coefficients, one);
   }
 
-  function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
+  function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
-      input = evaluate(self.composedWith[0], input, one, accuracy, factorialLookupTable);
+      input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
     if (self.form > Form.POLYNOMIAL) {
-      return _evaluateTranscendental(self, input, one, accuracy, factorialLookupTable);
+      return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
-    return _evaluatePolynomial(self, input, one, factorialLookupTable);
+    return _evaluatePolynomial(self, input, factorialLookupTable);
   }
 
   // evaluates polynomial having integer coefficients and rational input
-  function evaluate(fn memory self, int input, int one, uint[] memory factorialLookupTable) internal pure returns(int) {
+  function evaluate(fn memory self, int input, uint[] memory factorialLookupTable) internal pure returns(int) {
     require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
-    return _evaluatePolynomial(self, input, one, factorialLookupTable);
+    return _evaluatePolynomial(self, input, factorialLookupTable);
   }
 
-  function _evaluateTranscendental(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
     int[] memory coefficients = new int[](accuracy);
     uint startIdx;
     uint idxGap=1;
     int unit=1;
     if (self.form != Form.EXP) { // then is sin or cos
-      uint piNormalized = PI * uint(one) / (10**36);
-      input = (input % int(piNormalized)) * one; // we embrace the periodicity
+      uint piNormalized = PI * self.one / (10**36);
+      input = (input % int(piNormalized)) * int(self.one); // we embrace the periodicity
       accuracy = 2*accuracy; 
       startIdx = (self.form==Form.SIN) ? 1 : 0;
       idxGap=2;
@@ -66,24 +67,24 @@ library Calculus {
     } /* else if (self.form == Form.EXP) {
       unit=1;
     }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
-    int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, uint(one));
+    int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
     uint idx;
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
       coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
       idx++;
     }
     // FIXME.. think this step is broken until update whole library to support coefficients in Q
-    return _evaluatePolynomial(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
+    return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
   }
 
   // currently assumes input is a rational and coefficients is an integer
-  function _evaluatePolynomial(fn memory self, int input, int one, uint[] memory factorialLookupTable) private pure returns(int) {
+  function _evaluatePolynomial(fn memory self, int input, uint[] memory factorialLookupTable) private pure returns(int) {
     int ret;
     uint coefLen = self.coefficients.length;
     for (uint i=0; i<coefLen; i++) {
-      ret += self.coefficients[i] * Pow.pow(input, i, one, factorialLookupTable);
+      ret += self.coefficients[i] * Pow.pow(input, i, self.one, factorialLookupTable);
     }
-    ret = ret / one;
+    ret = ret / int(self.one);
     return self.polarity * ret;
   }
 
@@ -133,7 +134,7 @@ library Calculus {
     for (uint i=0; i<coefLen-1; i++) {
       coefficients[i] = self.coefficients[i+1] * int(i+1);
     } 
-    return newFn(coefficients);
+    return newFn(coefficients, self.one);
   }
 
   /*

@@ -11,12 +11,12 @@ contract TestPow {
     return ft;
   }
 
-  function testPowInteger(int base, uint power, int one, uint factorialLookupBound) public pure returns(int) {
+  function testPowInteger(int base, uint power, uint one, uint factorialLookupBound) public pure returns(int) {
     uint[] memory factorialLookupTable = LookupTables.buildFactorialLookupTable(factorialLookupBound);
     return Pow.pow(base, power, one, factorialLookupTable);
   }
 
-  function testPowIntegerGas(int base, uint power, int one, uint factorialLookupBound) public {
+  function testPowIntegerGas(int base, uint power, uint one, uint factorialLookupBound) public {
     uint[] memory factorialLookupTable = LookupTables.buildFactorialLookupTable(factorialLookupBound);
     require(Pow.pow(base, power, one, factorialLookupTable)!=0, "trivial check");
   }

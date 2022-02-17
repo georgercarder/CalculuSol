@@ -11,19 +11,19 @@ contract TestCalculus {
     int[] coefficients;
   }
 
-  function testPolynomial(int[] calldata coefficients) external pure returns(strippedFn memory) {
-    Calculus.fn memory f = Calculus.newFn(coefficients);
+  function testPolynomial(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
+    Calculus.fn memory f = Calculus.newFn(coefficients, one);
     return strippedFn(f.form, f.polarity, f.coefficients);
   }
 
-  function testPolynomialEvaluation(int[] calldata coefficients, int input, int one) external pure returns(int) {
-    Calculus.fn memory f = Calculus.newFn(coefficients);
+  function testPolynomialEvaluation(int[] calldata coefficients, int input, uint one) external pure returns(int) {
+    Calculus.fn memory f = Calculus.newFn(coefficients, one);
     uint[] memory ft = LookupTables.buildFactorialLookupTable(coefficients.length);
-    return Calculus.evaluate(f, input, one, 0, ft); // accuracy=0 for polynomial
+    return Calculus.evaluate(f, input, 0, ft); // accuracy=0 for polynomial
   }
 
-  function testPolynomialDifferentiation(int[] calldata coefficients) external pure returns(strippedFn memory) {
-    Calculus.fn memory f = Calculus.newFn(coefficients);
+  function testPolynomialDifferentiation(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
+    Calculus.fn memory f = Calculus.newFn(coefficients, one);
     Calculus.fn[] memory df = Calculus.differentiate(f);
     return strippedFn(df[0].form, df[0].polarity, df[0].coefficients);
   }

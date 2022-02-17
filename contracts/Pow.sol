@@ -8,15 +8,15 @@ library Pow {
     return (x>0) ? x : -x;
   }
 
-  function pow(int base, uint power, int one, uint[] memory factorialLookupTable) internal pure returns(int ret) {
+  function pow(int base, uint power, uint one, uint[] memory factorialLookupTable) internal pure returns(int ret) {
     require(factorialLookupTable.length+1 >= power, "factorialLookupTable is lacking."); // TODO double check this indexing wrt ( n k ) (choose)
     int sign = (base > int(0)) ? int(1) : int(-1);
     int absBase = abs(base);
-    int integer = absBase / one; 
-    int fraction = absBase % one;
-    int firstTermOfBinomialExpansion = _sign(sign, power) * (integer ** power) * one;
+    int integer = absBase / int(one); 
+    int fraction = absBase % int(one);
+    int firstTermOfBinomialExpansion = _sign(sign, power) * (integer ** power) * int(one);
     ret += firstTermOfBinomialExpansion;
-    if (fraction != 0) ret += _lesserTermsOfBinomialExpansion(sign, integer, fraction, power, one, factorialLookupTable);
+    if (fraction != 0) ret += _lesserTermsOfBinomialExpansion(sign, integer, fraction, power, int(one), factorialLookupTable);
   }
 
   // sum (0,n) i : (n i) * a^(n-i) * b^i
