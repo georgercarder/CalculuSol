@@ -87,8 +87,7 @@ library Calculus {
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
       coefficients[idx] = (unit**n) * factorialReciprocalsLookupTable[i]; 
       n++;
-      coefficients[idx+1] = 0;
-      idx+=2;
+      idx+=idxGap;
     }
     // FIXME.. think this step is broken until update whole library to support coefficients in Q
     return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
