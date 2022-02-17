@@ -5,8 +5,6 @@ import "./Pow.sol";
 
 library Calculus {
 
-  // TODO lookup table of {1/(n!)} for some "big" n (20??) since will be used in _evaluateTranscendental
-
   // TODO currently coefficients are assumed to be integers Z, while the indeterminate is from the rationals Q, so need to update so that coefficients are also from Q
 
   struct fn {

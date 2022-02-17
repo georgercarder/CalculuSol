@@ -39,7 +39,8 @@ library Pow {
 
   function _powFraction(int absBase, uint power, int one) private pure returns(int) {
     if (power == 1) return absBase;
-    return absBase * _powFraction(absBase, power-1, one) / one; 
+    return absBase * _powFraction(absBase, power-1, one) / one;
+    // return (absBase**power) / (one**(power-1)); // this strategy overflows more easily, so we use the work above
   }
 
   function _sign(int sign, uint power) private pure returns(int) {
@@ -47,17 +48,6 @@ library Pow {
       return int(1);
     }
     return (power%2==0) ? int(1) : int(-1);
-  }
-
-  function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
-    require(n>1, "n<=1.");
-    uint[] memory ret = new uint[](n+1);
-    ret[0] = 1;
-    ret[1] = 1;
-    for (uint i=2; i<=n; i++) {
-      ret[i] = i * ret[i-1]; 
-    }
-    return ret;
   }
 
 }

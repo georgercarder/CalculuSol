@@ -62,13 +62,34 @@ describe("TestPow", function () {
     power = 3;
     expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(15.625*one));
 
-    base = -9185915713;
+    //base = -9185915713;
     power = 5;
-    one = 10000;
+    one = bn(10).pow(4);//10000;
+    base = bn(918591).mul(one);
+    let decimals = bn(5713);
+    base = base.add(decimals);
+    base = base.mul(bn(-1))
 
     // note: this demonstrates that Pow is indeed an approximation, since otherwise this would equal bn(base).mul(one).pow(5); Pow is an approximation since full accuracy 1) is not necessarily needed, and would be expensive as far as gas goes.
-    expect((await testPow.testPowInteger(base, power, one, factorialLookupBound)).toString()).to.equal("-6540479364123122858837639765909738");
-
+    //expect((await testPow.testPowInteger(base, power, one, factorialLookupBound)).toString()).to.equal("-6540479364123122858837639765909738");
+    res = await testPow.testPowIntegerGas(base, power, one, factorialLookupBound);
+    res = await res.wait();
+    // 62474
+    // 63300 gas ??
+  
+    // base = -7123456789123456789 // overflows so construct using bn
+    // one = 1000000000000000000
+    one = bn(10).pow(18);
+    base = bn(78123).mul(bn(one)); 
+    decimals = bn(123456789);
+    base = base.add(decimals);
+    decimals = decimals.mul(bn(10).pow(9))
+    base = base.add(decimals);
+    base = bn(-1).mul(base);
+    power = 9;
+    factorialLookupBound = 9;
+    expect((await testPow.testPowInteger(base, power, one, factorialLookupBound)).toString()).to.equal("-108393698117910208120989803949047816850835654671182042910689614");
+    
     
   });
 });
