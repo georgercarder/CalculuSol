@@ -67,7 +67,7 @@ library Calculus {
     uint startIdx;
     uint idxGap=1;
     int unit=1;
-    if (self.form != Form.EXP) { // then is sin or cos
+    if (self.form < Form.EXP) { // then is sin or cos
       qt = QuotientType.FACTORIAL;
       input = _putInNeighborhoodOfZero(input, self.one);
       accuracy = 2*accuracy; 
