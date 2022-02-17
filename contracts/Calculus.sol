@@ -66,10 +66,10 @@ library Calculus {
     } /* else if (self.form == Form.EXP) {
       unit=1;
     }*/ // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
-    int[] memory tmpCoefficients = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, uint(one));
+    int[] memory factorialReciprocalsLookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, uint(one));
     uint idx;
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**i) * tmpCoefficients[i]; 
+      coefficients[idx] = (unit**i) * factorialReciprocalsLookupTable[i]; 
       idx++;
     }
     return evaluate(newFn(coefficients, self.polarity), input, one, factorialLookupTable);
@@ -135,7 +135,7 @@ library Calculus {
   }
 
   /*
-
   function integrate(fn self) external returns(fn);
  */
+
 }
