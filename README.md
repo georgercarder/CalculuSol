@@ -2,7 +2,7 @@
 
 WIP an attempt at writing a calculus library
 
-The MIT License (MIT) Copyright (c) 2022 George R. Carder georgercarder@gmail.com
+MIT License (MIT) Copyright (c) 2022 George R. Carder georgercarder@gmail.com
 
 Support my work on this library by donating ETH or other coins to
 
