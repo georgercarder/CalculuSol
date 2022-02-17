@@ -1,6 +1,12 @@
 # Calculus.sol
 
-WIP an attempt at writing a calculus library
+WIP calculus library
+
+- currently builds, differentiates and evaluates polynomials and many transcendental functions
+
+- todo is to support more transcendental function and some degree of composition
+
+- todo is to build integration
 
 MIT License (MIT) Copyright (c) 2022 George R. Carder georgercarder@gmail.com
 
