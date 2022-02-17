@@ -35,6 +35,27 @@ describe("TestPow", function () {
     factorialLookupBound = 7;
     expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(-823543));
 
-    //expect(await testPow.greet()).to.equal("Hello, world!");
+    // now check for representation of one>1
+    one = 1000;
+
+    base = 2*one;
+    power = 3;
+    factorialLookupBound = 4;
+
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(8*one));
+    base = -2*one;
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(-8*one));
+    base = 4*one;
+
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(64*one));
+
+    base = -4*one;
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(-64*one));
+    base = -7*one;
+    power = 7;
+    factorialLookupBound = 7;
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(-823543).mul(bn(one)));
+
+    // now check for rational numbers
   });
 });

@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+// Pow is b^n where b is a rational number and n is a natural number
 library Pow {
 
   function abs(int x) internal pure returns(int) {
