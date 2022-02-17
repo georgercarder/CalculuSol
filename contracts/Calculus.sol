@@ -22,14 +22,12 @@ library Calculus {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory composedWith;
     int[] memory coefficients;
-    fn memory f = fn(composedWith, form, 1, coefficients);
-    return f;
+    return fn(composedWith, form, 1, coefficients);
   }
 
   function newFn(int[] memory coefficients) internal pure returns(fn memory) {
     fn[] memory composedWith;
-    fn memory f = fn(composedWith, Form.POLYNOMIAL, 1, coefficients);
-    return f;
+    return fn(composedWith, Form.POLYNOMIAL, 1, coefficients);
   }
 
   function evaluate(fn memory self, int input, int one, uint accuracy, uint[] memory factorialLookupTable) internal returns(int) {
