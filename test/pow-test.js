@@ -12,7 +12,7 @@ describe("TestPow", function () {
     await testPow.deployed();
 
     let res = await testPow.testFactorialLookupTable(6);
-    let expected = [bn(2), bn(6), bn(24), bn(120), bn(720)];
+    let expected = [bn(1), bn(1), bn(2), bn(6), bn(24), bn(120), bn(720)];
     for (let i=0; i<res.length; i++) {
       expect(res[i]).to.equal(expected[i]);
     }
@@ -57,5 +57,10 @@ describe("TestPow", function () {
     expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(-823543).mul(bn(one)));
 
     // now check for rational numbers
+
+    base = 2500; // 2.5
+    power = 3;
+    expect(await testPow.testPowInteger(base, power, one, factorialLookupBound)).to.equal(bn(15.625*one));
+    
   });
 });

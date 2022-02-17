@@ -34,7 +34,7 @@ library Pow {
 
   function nChooseK(uint n, uint k, uint[] memory factorialLookupTable) internal pure returns(uint ret) {
     // n!/(k!*(n-k)!)
-    return factorialLookupTable[n-2] / (factorialLookupTable[k-2] * factorialLookupTable[n-k-2]);
+    return factorialLookupTable[n] / (factorialLookupTable[k] * factorialLookupTable[n-k]);
   }
 
   function _powFraction(int absBase, uint power, int one) private pure returns(int) {
@@ -51,10 +51,11 @@ library Pow {
 
   function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
     require(n>1, "n<=1.");
-    uint[] memory ret = new uint[](n-1);
-    ret[0] = 2;
-    for (uint i=3; i<=n; i++) {
-      ret[i-2] = i * ret[i-3]; 
+    uint[] memory ret = new uint[](n+1);
+    ret[0] = 1;
+    ret[1] = 1;
+    for (uint i=2; i<=n; i++) {
+      ret[i] = i * ret[i-1]; 
     }
     return ret;
   }
