@@ -232,13 +232,13 @@ library Calculus {
     factors1[0] = self.operands[1];
     factors1[1] = dfs[0];
     fn[] memory summands = new fn[](2);
-    summands[0] = newFn(factors0, BinaryOp.MULTIPLY);
-    summands[1] = newFn(factors1, BinaryOp.MULTIPLY);
+    summands[0] = newFn(factors1, BinaryOp.MULTIPLY);
+    summands[1] = newFn(factors0, BinaryOp.MULTIPLY);
     if (self.op == BinaryOp.MULTIPLY) {
       // a*b' + a'*b
       return newFn(summands, BinaryOp.ADD);
     } // self.op == BinaryOp.DIVIDE
-    // low * dHigh - high * dLow / (low)^2 :)
+    // (low * dHigh - high * dLow) / (low)^2 :)
     fn[] memory operands = new fn[](2);
     operands[0] = newFn(summands, BinaryOp.SUBTRACT);
     fn[] memory lows = new fn[](2);
