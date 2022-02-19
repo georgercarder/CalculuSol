@@ -9,51 +9,63 @@ library Calculus {
   struct fn {
     fn[] composedWith; // composition member
     Form form; // transcendental, polynomial, etc
-    int polarity;
+    int scalar;
     int[] coefficients;
+    fn[] operands;
+    BinaryOp op;
     uint one;
   }
 
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
-  enum Form {POLYNOMIAL, SIN, COS, EXP, LN} // etc
+  enum Form {BINARYOP, POLYNOMIAL, SIN, COS, EXP, LN} // etc
+  enum BinaryOp {NONE, ADD, SUBTRACT, MULTIPLY, DIVIDE}
 
   // transcendental
   function newFn(Form form, uint one) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
-    fn[] memory composedWith;
-    int[] memory coefficients;
-    return fn(composedWith, form, 1, coefficients, one);
+    fn[] memory blank;
+    int[] memory blank_;
+    return fn(blank, form, 1, blank_, blank, BinaryOp.NONE, one);
   }
 
-  function newFn(Form form, uint one, int polarity) internal pure returns(fn memory) {
+  function newFn(Form form, uint one, int scalar) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
-    fn[] memory composedWith;
-    int[] memory coefficients;
-    return fn(composedWith, form, polarity, coefficients, one);
+    fn[] memory blank;
+    int[] memory blank_;
+    return fn(blank, form, scalar, blank_, blank, BinaryOp.NONE, one);
   }
 
   // polynomial
   function newFn(int[] memory coefficients, uint one) internal pure returns(fn memory) {
-    fn[] memory composedWith;
-    return fn(composedWith, Form.POLYNOMIAL, 1, coefficients, one);
+    fn[] memory blank;
+    return fn(blank, Form.POLYNOMIAL, 1, coefficients, blank, BinaryOp.NONE, one);
   }
 
-  function newFn(int[] memory coefficients, int polarity, uint one) internal pure returns(fn memory) {
-    fn[] memory composedWith;
-    return fn(composedWith, Form.POLYNOMIAL, polarity, coefficients, one);
+  function newFn(int[] memory coefficients, int scalar, uint one) internal pure returns(fn memory) {
+    fn[] memory blank;
+    return fn(blank, Form.POLYNOMIAL, scalar, coefficients, blank, BinaryOp.NONE, one);
   }
 
+  // as operation
+  function newFn(fn[] memory operands, BinaryOp op) internal pure returns(fn memory) {
+    fn[] memory blank;
+    int[] memory blank_;
+    return fn(blank, Form.BINARYOP, 0, blank_, operands, op, 0); 
+  }
+  
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
       input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
     if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
-    return _evaluatePolynomial(self, input, factorialLookupTable);
+    if (self.form == Form.POLYNOMIAL)
+      return _evaluatePolynomial(self, input, factorialLookupTable);
+    return _evaluateBinaryOperation(self, input, accuracy, factorialLookupTable);
   }
 
-  // evaluates polynomial having integer coefficients and rational input
+  // evaluates polynomial having rational input and coeffiecients 
   function evaluate(fn memory self, int input, uint[] memory factorialLookupTable) internal pure returns(int) {
     require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
     return _evaluatePolynomial(self, input, factorialLookupTable);
@@ -108,7 +120,7 @@ library Calculus {
       idx+=idxGap;
     }
     }
-    return _evaluatePolynomial(newFn(coefficients, self.polarity, self.one), input, factorialLookupTable);
+    return _evaluatePolynomial(newFn(coefficients, self.scalar, self.one), input, factorialLookupTable);
   }
 
   function _putInNeighborhoodOfZero(int input, uint one) private pure returns(int ret) {
@@ -124,7 +136,31 @@ library Calculus {
       ret += self.coefficients[i] * Pow.pow(input, i, self.one, factorialLookupTable);
     }
     ret = ret / int(self.one);
-    return self.polarity * ret;
+    return self.scalar * ret;
+  }
+
+  function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
+    require(self.op > BinaryOp.NONE && self.op <= BinaryOp.DIVIDE, "BinaryOp undefined.");
+    int res0 = evaluate(self.operands[0], input, accuracy, factorialLookupTable);
+    int res1 = evaluate(self.operands[1], input, accuracy, factorialLookupTable);
+    (res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
+    if (self.op == BinaryOp.ADD) {
+      return res0 + res1;
+    }
+    if (self.op == BinaryOp.SUBTRACT) {
+      return res0 - res1;
+    }
+    if (self.op == BinaryOp.MULTIPLY) {
+      return res0 * res1;
+    } // else if fn.op == BinaryOp.DIVIDE
+    return res0 / res1;
+  }
+
+  function _normalizeWRTOnes(int value0, uint one0, int value1, uint one1) private pure returns(int, int) {
+    if (one0==one1) return (value0, value1);
+    if (one0 < one1) 
+      return (int(one1)*value0/int(one0), value1); 
+    return (value0, int(one0)*value1/int(one1));
   }
 
   function compose(fn memory self, fn memory other) internal pure returns(fn memory) {
@@ -133,15 +169,17 @@ library Calculus {
     return self;
   }
 
-  function differentiate(fn memory self) internal pure returns(fn[] memory factors) {
-    factors = new fn[](1);
+  function differentiate(fn memory self) internal pure returns(fn memory) {
+    fn[] memory factors = new fn[](1);
     bool isInner=true;
+    factors[0] = _differentiate(self, !isInner); 
     if (self.composedWith.length > 0) {
       factors = new fn[](2);
       isInner=true;
       factors[1] = _differentiate(self.composedWith[0], isInner);
+      return newFn(factors, BinaryOp.MULTIPLY); 
     }
-    factors[0] = _differentiate(self, !isInner); 
+    return factors[0];
   }
 
   function _differentiate(fn memory self, bool isInner) private pure returns(fn memory) {
@@ -159,7 +197,7 @@ library Calculus {
       self.form = Form.COS;
       return self;
     } else if (self.form == Form.COS) {
-      self.polarity = -self.polarity;
+      self.scalar = -self.scalar;
       self.form = Form.SIN;
       return self;
     } // ETC
@@ -174,7 +212,7 @@ library Calculus {
     for (uint i=0; i<coefLen-1; i++) {
       coefficients[i] = self.coefficients[i+1] * int(i+1);
     } 
-    return newFn(coefficients, self.one);
+    return newFn(coefficients, self.scalar, self.one);
   }
 
   /*
