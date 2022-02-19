@@ -171,24 +171,25 @@ library Calculus {
   }
 
   function differentiate(fn memory self) internal pure returns(fn memory) {
-    fn[] memory factors = new fn[](1);
+    fn[] memory operands = new fn[](1);
     bool isInner=true;
-    factors[0] = _differentiate(self, !isInner); 
+    operands[0] = _differentiate(self, !isInner); 
     if (self.composedWith.length > 0) {
-      factors = new fn[](2);
+      operands = new fn[](2);
       isInner=true;
-      factors[1] = _differentiate(self.composedWith[0], isInner);
-      return newFn(factors, BinaryOp.MULTIPLY); 
+      operands[1] = _differentiate(self.composedWith[0], isInner);
+      return newFn(operands, BinaryOp.MULTIPLY); 
     }
-    return factors[0];
+    return operands[0];
   }
 
   function _differentiate(fn memory self, bool isInner) private pure returns(fn memory) {
     require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
-    if (self.form > Form.POLYNOMIAL) {
+    if (self.form > Form.POLYNOMIAL)
       return _differentiateTranscendental(self);
-    } // else form == POLYNOMIAL
-    return _differentiatePolynomial(self);
+    if (self.form == Form.POLYNOMIAL)
+      return _differentiatePolynomial(self);
+    return _differentiateBinaryOp(self);
   }
 
   // FIXME handle LN
@@ -214,6 +215,37 @@ library Calculus {
       coefficients[i] = self.coefficients[i+1] * int(i+1);
     } 
     return newFn(coefficients, self.scalar, self.one);
+  }
+
+  function _differentiateBinaryOp(fn memory self) private pure returns(fn memory) {
+    fn[] memory dfs = new fn[](2);
+    dfs[0] = differentiate(self.operands[0]);
+    dfs[1] = differentiate(self.operands[1]);
+    if (self.op < BinaryOp.MULTIPLY) { // +,-
+      // d op = op d
+      return newFn(dfs, self.op); 
+    } 
+    fn[] memory factors0 = new fn[](2);
+    factors0[0] = self.operands[0];
+    factors0[1] = dfs[1]; 
+    fn[] memory factors1 = new fn[](2);
+    factors1[0] = self.operands[1];
+    factors1[1] = dfs[0];
+    fn[] memory summands = new fn[](2);
+    summands[0] = newFn(factors0, BinaryOp.MULTIPLY);
+    summands[1] = newFn(factors1, BinaryOp.MULTIPLY);
+    if (self.op == BinaryOp.MULTIPLY) {
+      // a*b' + a'*b
+      return newFn(summands, BinaryOp.ADD);
+    } // self.op == BinaryOp.DIVIDE
+    // low * dHigh - high * dLow / (low)^2 :)
+    fn[] memory operands = new fn[](2);
+    operands[0] = newFn(summands, BinaryOp.SUBTRACT);
+    fn[] memory lows = new fn[](2);
+    lows[0] = self.operands[1];
+    lows[1] = self.operands[1];
+    operands[1] = newFn(lows, BinaryOp.MULTIPLY);
+    return newFn(operands, BinaryOp.DIVIDE);
   }
 
   /*
