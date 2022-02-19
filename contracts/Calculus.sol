@@ -57,6 +57,7 @@ library Calculus {
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
       input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
+      (input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
     if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
