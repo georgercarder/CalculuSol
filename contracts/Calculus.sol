@@ -57,6 +57,8 @@ library Calculus {
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
       input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
+      // FIXME I think this normalization might be problematic here
+      // TODO give this step more thought...
       (input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
     if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
@@ -140,6 +142,7 @@ library Calculus {
     return self.scalar * ret;
   }
 
+  // TODO test correctness
   function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
     require(self.op > BinaryOp.NONE && self.op <= BinaryOp.DIVIDE, "BinaryOp undefined.");
     int res0 = evaluate(self.operands[0], input, accuracy, factorialLookupTable);
@@ -217,6 +220,7 @@ library Calculus {
     return newFn(coefficients, self.scalar, self.one);
   }
 
+  // TODO test correctness
   function _differentiateBinaryOp(fn memory self) private pure returns(fn memory) {
     fn[] memory dfs = new fn[](2);
     dfs[0] = differentiate(self.operands[0]);
