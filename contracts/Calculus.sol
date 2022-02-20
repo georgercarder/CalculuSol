@@ -59,7 +59,7 @@ library Calculus {
       input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
       // FIXME I think this normalization might be problematic here
       // TODO give this step more thought...
-      (input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
+      //(input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
     if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
     } // else form == POLYNOMIAL
@@ -133,10 +133,14 @@ library Calculus {
 
   // assumes input, and coefficients are rationals Q
   function _evaluatePolynomial(fn memory self, int input, uint[] memory factorialLookupTable) private pure returns(int) {
-    int ret;
     uint coefLen = self.coefficients.length;
-    for (uint i=0; i<coefLen; i++) {
-      ret += self.coefficients[i] * Pow.pow(input, i, self.one, factorialLookupTable);
+    int lastPower = int(self.one);
+    int power;
+    int ret = self.coefficients[0] * lastPower;
+    for (uint i=1; i<coefLen; i++) {
+      power = lastPower * input / int(self.one);
+      ret += self.coefficients[i] * power; // Pow.pow(input, i, self.one, factorialLookupTable); // TODO compare gas usage before totally replacing
+      lastPower = power;
     }
     ret = ret / int(self.one);
     return self.scalar * ret;
