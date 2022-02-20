@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Pow.sol";
+import "./Math.sol";
 import "./LookupTables.sol";
 
 library Calculus {
@@ -54,29 +54,29 @@ library Calculus {
     return fn(blank, Form.BINARYOP, 0, blank_, operands, op, 0); 
   }
   
-  function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) internal pure returns(int) {
+  function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(int) {
     if (self.composedWith.length > 0)
-      input = evaluate(self.composedWith[0], input, accuracy, factorialLookupTable);
+      input = evaluate(self.composedWith[0], input, accuracy, factorialReciprocalsLookupTable);
       // FIXME I think this normalization might be problematic here
       // TODO give this step more thought...
       //(input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
     if (self.form > Form.POLYNOMIAL) {
-      return _evaluateTranscendental(self, input, accuracy, factorialLookupTable);
+      return _evaluateTranscendental(self, input, accuracy, factorialReciprocalsLookupTable);
     } // else form == POLYNOMIAL
     if (self.form == Form.POLYNOMIAL)
-      return _evaluatePolynomial(self, input, factorialLookupTable);
-    return _evaluateBinaryOperation(self, input, accuracy, factorialLookupTable);
+      return _evaluatePolynomial(self, input);//, factorialReciprocalsLookupTable);
+    return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
   }
 
   // evaluates polynomial having rational input and coeffiecients 
-  function evaluate(fn memory self, int input, uint[] memory factorialLookupTable) internal pure returns(int) {
+  function evaluate(fn memory self, int input) internal pure returns(int) {
     require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
-    return _evaluatePolynomial(self, input, factorialLookupTable);
+    return _evaluatePolynomial(self, input);
   }
 
   enum QuotientType {NONE, FACTORIAL, FACTOR}
 
-  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(int) {
     int[] memory coefficients = new int[](2*accuracy+1);
     QuotientType qt = QuotientType.NONE;
     uint startIdx;
@@ -95,17 +95,15 @@ library Calculus {
     } else if (self.form == Form.LN) {
       qt = QuotientType.FACTOR; 
       input = input - int(self.one);
-      require(Pow.abs(input) < int(self.one), "input out of domain.");
+      require(Math.abs(input) < int(self.one), "input out of domain.");
       accuracy = 2*accuracy;
       startIdx = 1;
       idxGap=2;
       unit=-1;
       // TODO update unit test for LN
     }
-    int[] memory lookupTable;
-    if (qt == QuotientType.FACTORIAL) {
-      lookupTable = LookupTables.buildFactorialReciprocalsLookupTable(factorialLookupTable, self.one);
-    } else if (qt == QuotientType.FACTOR) {
+    uint[] memory lookupTable = factorialReciprocalsLookupTable;
+    if (qt == QuotientType.FACTOR) {
       lookupTable = LookupTables.buildFactorReciprocalsLookupTable(self.one, accuracy);
     } else {  // qt == QuotientType.NONE
       //  TODO
@@ -118,12 +116,12 @@ library Calculus {
       idx++;
     }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**n) * lookupTable[i]; 
+      coefficients[idx] = (unit**n) * int(lookupTable[i]); 
       n++;
       idx+=idxGap;
     }
     }
-    return _evaluatePolynomial(newFn(coefficients, self.scalar, self.one), input, factorialLookupTable);
+    return _evaluatePolynomial(newFn(coefficients, self.scalar, self.one), input);
   }
 
   function _putInNeighborhoodOfZero(int input, uint one) private pure returns(int ret) {
@@ -132,14 +130,14 @@ library Calculus {
   }
 
   // assumes input, and coefficients are rationals Q
-  function _evaluatePolynomial(fn memory self, int input, uint[] memory factorialLookupTable) private pure returns(int) {
+  function _evaluatePolynomial(fn memory self, int input) private pure returns(int) {
     uint coefLen = self.coefficients.length;
     int lastPower = int(self.one);
     int power;
     int ret = self.coefficients[0] * lastPower;
     for (uint i=1; i<coefLen; i++) {
       power = lastPower * input / int(self.one);
-      ret += self.coefficients[i] * power; // Pow.pow(input, i, self.one, factorialLookupTable); // TODO compare gas usage before totally replacing
+      ret += self.coefficients[i] * power;
       lastPower = power;
     }
     ret = ret / int(self.one);
@@ -147,10 +145,10 @@ library Calculus {
   }
 
   // TODO test correctness
-  function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialLookupTable) private pure returns(int) {
+  function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(int) {
     require(self.op > BinaryOp.NONE && self.op <= BinaryOp.DIVIDE, "BinaryOp undefined.");
-    int res0 = evaluate(self.operands[0], input, accuracy, factorialLookupTable);
-    int res1 = evaluate(self.operands[1], input, accuracy, factorialLookupTable);
+    int res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
+    int res1 = evaluate(self.operands[1], input, accuracy, factorialReciprocalsLookupTable);
     (res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
     if (self.op == BinaryOp.ADD) {
       return res0 + res1;

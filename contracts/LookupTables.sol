@@ -3,29 +3,24 @@ pragma solidity ^0.8.0;
 
 library LookupTables {
 
-  function buildFactorialLookupTable(uint n) internal pure returns(uint[] memory) {
-    uint[] memory ret = new uint[](n+1);
-    ret[0] = 1;
-    for (uint i=1; i<=n; i++) {
-      ret[i] = i * ret[i-1]; 
-    }
-    return ret;
-  }
-
-  function buildFactorReciprocalsLookupTable(uint one, uint len) internal pure returns(int[] memory ret) {
-    ret = new int[](len); 
-    ret[0] = int(one);
+  function buildFactorReciprocalsLookupTable(uint one, uint len) internal pure returns(uint[] memory ret) {
+    ret = new uint[](len); 
+    ret[0] = one;
     for (uint i=1; i<=len; i++) {
-      ret[i] = int(one / i); // no normalizing by one since factorLookupTable is not scaled by one
+      ret[i] = one / i;
     }
     return ret;
   }
 
-  function buildFactorialReciprocalsLookupTable(uint[] memory factorialLookupTable, uint one) internal pure returns(int[] memory ret) {
-    ret = new int[](factorialLookupTable.length); 
-    uint len = factorialLookupTable.length;
-    for (uint i=0; i<len; i++) {
-      ret[i] = int(one / factorialLookupTable[i]); // no normalizing by one since factorialLookupTable is not scaled by one
+  function buildFactorialReciprocalsLookupTable(uint one, uint len) internal pure returns(uint[] memory ret) {
+    ret = new uint[](len); 
+    uint last = 1;
+    uint factorial;
+    ret[0] = one;
+    for (uint i=1; i<len; i++) {
+      factorial = last * i;
+      ret[i] = one / factorial;
+      last = factorial;
     }
     return ret;
   }

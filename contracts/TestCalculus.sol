@@ -19,8 +19,7 @@ contract TestCalculus {
 
   function testPolynomialEvaluation(int[] calldata coefficients, int input, uint one) external pure returns(int) {
     Calculus.fn memory f = Calculus.newFn(coefficients, one);
-    uint[] memory ft = LookupTables.buildFactorialLookupTable(coefficients.length);
-    return Calculus.evaluate(f, input, 0, ft); // accuracy=0 for polynomial
+    return Calculus.evaluate(f, input);
   }
 
   function testPolynomialDifferentiation(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
@@ -40,8 +39,8 @@ contract TestCalculus {
 
   function testTranscendentalEvaluation(Calculus.Form form, uint one, int scalar, int input, uint accuracy) external pure returns(int) {
     Calculus.fn memory f = Calculus.newFn(form, one, scalar); 
-    uint[] memory ft = LookupTables.buildFactorialLookupTable(2*accuracy);
-    return Calculus.evaluate(f, input, accuracy, ft);
+    uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(one, 2*accuracy);
+    return Calculus.evaluate(f, input, accuracy, frt);
   }
 
 }
