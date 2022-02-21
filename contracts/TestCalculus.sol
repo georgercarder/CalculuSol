@@ -24,17 +24,15 @@ contract TestCalculus {
 
   function testPolynomialDifferentiation(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
     Calculus.fn memory f = Calculus.newFn(coefficients, one);
-    // FIXME after operands refactor
-    //Calculus.fn[] memory df = Calculus.differentiate(f);
-    //return strippedFn(df[0].form, df[0].scalar, df[0].coefficients, df[0].one);
+    Calculus.fn memory df = Calculus.differentiate(f);
+    return strippedFn(df.form, df.scalar, df.coefficients, df.one);
   }
 
   function testTrigDifferentiation(Calculus.Form form, uint one, int scalar, bool differentiate) external pure returns(strippedFn memory) {
     Calculus.fn memory f = Calculus.newFn(form, one, scalar); 
     if (!differentiate) return strippedFn(f.form, f.scalar, f.coefficients, f.one);
-    // FIXME after operands refactor
-    //Calculus.fn[] memory df = Calculus.differentiate(f);
-    //return strippedFn(df[0].form, df[0].scalar, df[0].coefficients, df[0].one);
+    Calculus.fn memory df = Calculus.differentiate(f);
+    return strippedFn(df.form, df.scalar, df.coefficients, df.one);
   }
 
   function testTranscendentalEvaluation(Calculus.Form form, uint one, int scalar, int input, uint accuracy) external pure returns(int) {

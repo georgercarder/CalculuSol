@@ -18,12 +18,11 @@ describe("TestCalculus", function () {
     let res = await testCalculus.testPolynomial(coefficients, one);
     let expected = [1, bn(1), bn(1), bn(20), bn(3), bn(40), one];
     expect(res.form).to.equal(expected[0]);
-    /*expect(res.scalar).to.equal(expected[1]);
+    expect(res.scalar).to.equal(expected[1]);
     for (let i=0; i<res.coefficients.length-1; i++) {
       expect(res.coefficients[i]).to.equal(expected[i+2]);
     }
     expect(res.one).to.equal(expected[expected.length-1]);
-     // FIXME
     let input = 2; // input is an integer
     let evaluatedPolynomial = bn(0);//bn(coefficients[0]);
     for (let i=0; i<coefficients.length; i++) {
@@ -37,10 +36,12 @@ describe("TestCalculus", function () {
     for (let i=0; i<coefficients.length; i++) {
       coefficients[i] = bn(coefficients[i]).mul(one);
     }
-    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(7575925356)); // "close" according to wolfram alpha 757.593
+    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(7575925516)); // "close" according to wolfram alpha 757.593
+    //
+    let FORM = {BINARYOP:0, POLYNOMIAL:1, SIN:2, COS:3, EXP:4} // etc
     
     // check differentiation
-    expected = [0, bn(1), bn(20), bn(6), bn(120), one];
+    expected = [FORM.POLYNOMIAL, bn(1), bn(20), bn(6), bn(120), one];
     for (let i=2; i<expected.length-1; i++) {
       expected[i] = expected[i].mul(one);
     }
@@ -52,10 +53,9 @@ describe("TestCalculus", function () {
       expect(res.coefficients[i]).to.equal(expected[i+2]);
     }
     expect(res.one).to.equal(expected[expected.length-1]);
-    */
+    
     // transcendentals
 
-    let FORM = {BINARYOP:0, POLYNOMIAL:1, SIN:2, COS:3, EXP:4} // etc
     let scalar = 1;
     let differentiate = false;
 
@@ -66,11 +66,10 @@ describe("TestCalculus", function () {
 
     // differentiation ensuring sin -> cos -> -sin -> -cos ~ Z_4
     differentiate = true;
-    /*res = await testCalculus.testTrigDifferentiation(FORM.SIN, one, scalar, differentiate);
+    res = await testCalculus.testTrigDifferentiation(FORM.SIN, one, scalar, differentiate);
     expect(res.form).to.equal(FORM.COS);
     expect(res.scalar).to.equal(scalar);
     expect(res.one).to.equal(one);
-     // FIXME
 
     res = await testCalculus.testTrigDifferentiation(FORM.COS, one, scalar, differentiate);
     expect(res.form).to.equal(FORM.SIN);
@@ -86,7 +85,6 @@ describe("TestCalculus", function () {
     expect(res.form).to.equal(FORM.SIN);
     expect(res.scalar).to.equal(scalar);
     expect(res.one).to.equal(one);
-    */
 
     one = bn(10).pow(18)
     // evaluate some values
