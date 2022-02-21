@@ -63,7 +63,7 @@ library Calculus {
       return _evaluateTranscendental(self, input, accuracy, factorialReciprocalsLookupTable);
     } // else form == POLYNOMIAL
     if (self.form == Form.POLYNOMIAL)
-      return _evaluatePolynomial(self, input);//, factorialReciprocalsLookupTable);
+      return _evaluatePolynomial(self, input);
     return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
   }
 
@@ -103,7 +103,7 @@ library Calculus {
     }
     uint[] memory lookupTable = factorialReciprocalsLookupTable;
     if (qt == QuotientType.FACTOR) {
-      lookupTable = LookupTables.buildFactorReciprocalsLookupTable(self.one, accuracy);
+      lookupTable = LookupTables.buildFactorReciprocalsLookupTable(accuracy);
     } else {  // qt == QuotientType.NONE
       //  TODO
     }
@@ -115,7 +115,7 @@ library Calculus {
       idx++;
     }
     for (uint i=startIdx; i<accuracy; i+=idxGap) {
-      coefficients[idx] = (unit**n) * int(lookupTable[i]); 
+      coefficients[idx] = (unit**n) * int(lookupTable[i]) * int(self.one) / int(LookupTables.one); 
       n++;
       idx+=idxGap;
     }

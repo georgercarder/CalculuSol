@@ -3,7 +3,9 @@ pragma solidity ^0.8.0;
 
 library LookupTables {
 
-  function buildFactorReciprocalsLookupTable(uint one, uint len) internal pure returns(uint[] memory ret) {
+  uint constant public one = 10**18;
+
+  function buildFactorReciprocalsLookupTable(uint len) internal pure returns(uint[] memory ret) {
     ret = new uint[](len); 
     ret[0] = one;
     for (uint i=1; i<=len; i++) {
@@ -12,7 +14,7 @@ library LookupTables {
     return ret;
   }
 
-  function buildFactorialReciprocalsLookupTable(uint one, uint len) internal pure returns(uint[] memory ret) {
+  function buildFactorialReciprocalsLookupTable(uint len) internal pure returns(uint[] memory ret) {
     ret = new uint[](len); 
     uint last = 1;
     uint factorial;
