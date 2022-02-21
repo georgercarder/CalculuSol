@@ -55,11 +55,10 @@ library Calculus {
   }
   
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(int) {
-    if (self.composedWith.length > 0)
+    if (self.composedWith.length > 0) { 
       input = evaluate(self.composedWith[0], input, accuracy, factorialReciprocalsLookupTable);
-      // FIXME I think this normalization might be problematic here
-      // TODO give this step more thought...
-      //(input,) = _normalizeWRTOnes(input, self.composedWith[0].one, 0, self.one);
+      input = input * int(self.one) / int(self.composedWith[0].one); // normalize
+    }
     if (self.form > Form.POLYNOMIAL) {
       return _evaluateTranscendental(self, input, accuracy, factorialReciprocalsLookupTable);
     } // else form == POLYNOMIAL
