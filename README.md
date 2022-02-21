@@ -2,7 +2,7 @@
 
 WIP calculus library
 
-- currently builds, differentiates and evaluates polynomials, many transcendental functions, functions combined by binary operations, and function composition // TODO increase test coverage of these aspects
+- wip outline to build, differentiate and evaluate polynomials, many transcendental functions, functions combined by binary operations, and function composition.. Currently debugging this outline. NOT READY FOR PRODUCTION
 
 - todo is to support integration
 
