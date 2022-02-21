@@ -59,12 +59,12 @@ library Calculus {
       input = evaluate(self.composedWith[0], input, accuracy, factorialReciprocalsLookupTable);
       input = input * int(self.one) / int(self.composedWith[0].one); // normalize
     }
-    if (self.form > Form.POLYNOMIAL) {
-      return _evaluateTranscendental(self, input, accuracy, factorialReciprocalsLookupTable);
-    } // else form == POLYNOMIAL
+    if (self.form == Form.BINARYOP)
+      return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
     if (self.form == Form.POLYNOMIAL)
       return _evaluatePolynomial(self, input);
-    return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
+    // else form == TRANSCENDENTAL
+    return _evaluateTranscendental(self, input, accuracy, factorialReciprocalsLookupTable);
   }
 
   // evaluates polynomial having rational input and coeffiecients 
@@ -200,12 +200,9 @@ library Calculus {
   function _differentiateTranscendental(fn memory self) private pure returns(fn memory) {
     // composition is handled by _differentiate
     if (self.form == Form.SIN) {
-      self.form = Form.COS;
-      return self;
+      return newFn(Form.COS, self.one, self.scalar); 
     } else if (self.form == Form.COS) {
-      self.scalar = -self.scalar;
-      self.form = Form.SIN;
-      return self;
+      return newFn(Form.SIN, self.one, -self.scalar); 
     } // ETC
     // case EXP
     return self;

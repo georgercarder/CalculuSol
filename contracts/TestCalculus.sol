@@ -7,6 +7,7 @@ contract TestCalculus {
 
   struct strippedFn {
     Calculus.Form form; // transcendental, polynomial, etc
+    Calculus.BinaryOp op;
     int scalar;
     int[] coefficients;
     uint one;
@@ -14,7 +15,7 @@ contract TestCalculus {
 
   function testPolynomial(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
     Calculus.fn memory f = Calculus.newFn(coefficients, one);
-    return strippedFn(f.form, f.scalar, f.coefficients, f.one);
+    return strippedFn(f.form, f.op, f.scalar, f.coefficients, f.one);
   }
 
   function testPolynomialEvaluation(int[] calldata coefficients, int input, uint one) external pure returns(int) {
@@ -25,14 +26,14 @@ contract TestCalculus {
   function testPolynomialDifferentiation(int[] calldata coefficients, uint one) external pure returns(strippedFn memory) {
     Calculus.fn memory f = Calculus.newFn(coefficients, one);
     Calculus.fn memory df = Calculus.differentiate(f);
-    return strippedFn(df.form, df.scalar, df.coefficients, df.one);
+    return strippedFn(df.form, df.op, df.scalar, df.coefficients, df.one);
   }
 
   function testTrigDifferentiation(Calculus.Form form, uint one, int scalar, bool differentiate) external pure returns(strippedFn memory) {
     Calculus.fn memory f = Calculus.newFn(form, one, scalar); 
-    if (!differentiate) return strippedFn(f.form, f.scalar, f.coefficients, f.one);
+    if (!differentiate) return strippedFn(f.form, f.op, f.scalar, f.coefficients, f.one);
     Calculus.fn memory df = Calculus.differentiate(f);
-    return strippedFn(df.form, df.scalar, df.coefficients, df.one);
+    return strippedFn(df.form, df.op, df.scalar, df.coefficients, df.one);
   }
 
   function testTranscendentalEvaluation(Calculus.Form form, uint one, int scalar, int input, uint accuracy) external pure returns(int) {
@@ -40,6 +41,18 @@ contract TestCalculus {
     uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(2*accuracy);
     return Calculus.evaluate(f, input, accuracy, frt);
   }
+
+  function testDEBUG(uint one0, int[] calldata coefficients0, Calculus.Form f1, uint one1, int scalar1, int input, uint accuracy) external pure returns(strippedFn memory) { 
+
+    Calculus.fn memory f = Calculus.newFn(coefficients0, one0);
+    Calculus.fn memory g = Calculus.newFn(f1, one1, scalar1); 
+
+    Calculus.fn memory fg = Calculus.compose(f, g);
+  
+    Calculus.fn memory dfg = Calculus.differentiate(fg);
+    return strippedFn(dfg.form, dfg.op, dfg.scalar, dfg.coefficients, dfg.one);
+  }
+
 
   // FIXME this test is showing there are many bugs wrt composition.. must fix
   function testComposition(uint one0, int[] calldata coefficients0, Calculus.Form f1, uint one1, int scalar1, int input, uint accuracy) external pure returns(int[] memory) {
@@ -50,6 +63,16 @@ contract TestCalculus {
     //Calculus.fn memory gf = Calculus.compose(g, f);
 
     Calculus.fn memory dfg = Calculus.differentiate(fg);
+    // FIXME this alters ret[0] below.. does differentiate write to "self"?
+
+    // debugging
+    /*require(dfg.form==Calculus.Form.BINARYOP, "debug");
+    require(dfg.op>Calculus.BinaryOp.NONE && dfg.op<=Calculus.BinaryOp.DIVIDE, "debug");
+    require(dfg.composedWith.length==0, "debug");
+    require(dfg.op==Calculus.BinaryOp.MULTIPLY, "debug");
+    */
+    // end debugging
+
     //Calculus.fn memory dgf = Calculus.differentiate(gf);
 
     uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(2*accuracy);
@@ -64,7 +87,7 @@ contract TestCalculus {
     }
     
     { // stack too deep
-    ret[2] = Calculus.evaluate(dfg, input, accuracy, frt);
+    //ret[2] = Calculus.evaluate(dfg, input, accuracy, frt);
     }
     /*
     { // stack too deep
