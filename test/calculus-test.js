@@ -135,6 +135,19 @@ describe("TestCalculus", function () {
     let EApproximate = bn('2718281826198492860');
     res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, scalar, input, accuracy);
     expect(res).to.equal(EApproximate);
+
+  
+    // test composition
+    //function testComposition(uint one0, int[] calldata coefficients0, Calculus.Form f1, uint one1, int scalar1, int input, uint accuracy) external pure returns(int[] memory) {
+    
+    coefficients = [-91504, 1482, -81492, 1204];
+    for (let i=0; i<coefficients.length; i++) {
+      coefficients[i] = bn(coefficients[i]).mul(one);
+    }
+    scalar = -2;
+    input = -123;
+    res = await testCalculus.testComposition(one, coefficients, FORM.SIN, one.mul(100), scalar, input, accuracy);
+    console.log(res);
     
   });
 });
