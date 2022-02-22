@@ -179,8 +179,7 @@ library Calculus {
     return _differentiate(self); 
   }
 
-  function _differentiate(fn memory self/*, bool isInner*/) private pure returns(fn memory) {
-    // FIXME update with new representation require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
+  function _differentiate(fn memory self) private pure returns(fn memory) {
     if (self.form > Form.POLYNOMIAL)
       return _differentiateTranscendental(self);
     if (self.form == Form.POLYNOMIAL)
@@ -219,7 +218,7 @@ library Calculus {
     if (self.op == BinaryOp.COMPOSITION) {
       factors0[0] = dfs[1]; // g'
       factors0[1] = compose(dfs[0], self.operands[1]); // f'(g)
-      return newFn(dfs, BinaryOp.MULTIPLY);
+      return newFn(factors0, BinaryOp.MULTIPLY);
     }
     if (self.op < BinaryOp.MULTIPLY) { // +,-
       // d op = op d
