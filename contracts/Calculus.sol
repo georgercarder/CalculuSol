@@ -7,7 +7,6 @@ import "./LookupTables.sol";
 library Calculus {
 
   struct fn {
-    fn[] composedWith; // composition member
     Form form; // transcendental, polynomial, etc
     int scalar;
     int[] coefficients;
@@ -19,46 +18,41 @@ library Calculus {
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
   enum Form {BINARYOP, POLYNOMIAL, SIN, COS, EXP, LN} // etc
-  enum BinaryOp {NONE, ADD, SUBTRACT, MULTIPLY, DIVIDE}
+  enum BinaryOp {NONE, COMPOSITION, ADD, SUBTRACT, MULTIPLY, DIVIDE}
 
   // transcendental
   function newFn(Form form, uint one) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory blank;
     int[] memory blank_;
-    return fn(blank, form, 1, blank_, blank, BinaryOp.NONE, one);
+    return fn(form, 1, blank_, blank, BinaryOp.NONE, one);
   }
 
   function newFn(Form form, uint one, int scalar) internal pure returns(fn memory) {
     require(form > Form.POLYNOMIAL, "use newFn(int[]) for POLYNOMIAL");
     fn[] memory blank;
     int[] memory blank_;
-    return fn(blank, form, scalar, blank_, blank, BinaryOp.NONE, one);
+    return fn(form, scalar, blank_, blank, BinaryOp.NONE, one);
   }
 
   // polynomial
   function newFn(int[] memory coefficients, uint one) internal pure returns(fn memory) {
     fn[] memory blank;
-    return fn(blank, Form.POLYNOMIAL, 1, coefficients, blank, BinaryOp.NONE, one);
+    return fn(Form.POLYNOMIAL, 1, coefficients, blank, BinaryOp.NONE, one);
   }
 
   function newFn(int[] memory coefficients, int scalar, uint one) internal pure returns(fn memory) {
     fn[] memory blank;
-    return fn(blank, Form.POLYNOMIAL, scalar, coefficients, blank, BinaryOp.NONE, one);
+    return fn(Form.POLYNOMIAL, scalar, coefficients, blank, BinaryOp.NONE, one);
   }
 
   // as operation
   function newFn(fn[] memory operands, BinaryOp op) internal pure returns(fn memory) {
-    fn[] memory blank;
     int[] memory blank_;
-    return fn(blank, Form.BINARYOP, 0, blank_, operands, op, 0); 
+    return fn(Form.BINARYOP, 0, blank_, operands, op, 0); 
   }
   
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(int) {
-    if (self.composedWith.length > 0) { 
-      input = evaluate(self.composedWith[0], input, accuracy, factorialReciprocalsLookupTable);
-      input = input * int(self.one) / int(self.composedWith[0].one); // normalize
-    }
     if (self.form == Form.BINARYOP)
       return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
     if (self.form == Form.POLYNOMIAL)
@@ -146,8 +140,14 @@ library Calculus {
   // TODO test correctness
   function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(int) {
     require(self.op > BinaryOp.NONE && self.op <= BinaryOp.DIVIDE, "BinaryOp undefined.");
-    int res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
-    int res1 = evaluate(self.operands[1], input, accuracy, factorialReciprocalsLookupTable);
+    int res0;
+    int res1;
+    res1 = evaluate(self.operands[1], input, accuracy, factorialReciprocalsLookupTable);
+    if (self.op == BinaryOp.COMPOSITION) {
+      res1 = res1 * int(self.operands[0].one) / int(self.operands[1].one); // normalize
+      return evaluate(self.operands[0], res1, accuracy, factorialReciprocalsLookupTable); 
+    }
+    res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
     (res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
     if (self.op == BinaryOp.ADD) {
       return res0 + res1;
@@ -169,26 +169,18 @@ library Calculus {
   }
 
   function compose(fn memory self, fn memory other) internal pure returns(fn memory) {
-    self.composedWith = new fn[](1);
-    self.composedWith[0] = other; 
-    return self;
+    fn[] memory operands = new fn[](2);
+    operands[0] = self;
+    operands[1] = other;
+    return newFn(operands, BinaryOp.COMPOSITION); 
   }
 
   function differentiate(fn memory self) internal pure returns(fn memory) {
-    fn[] memory operands = new fn[](1);
-    bool isInner=true;
-    operands[0] = _differentiate(self, !isInner); 
-    if (self.composedWith.length > 0) {
-      operands = new fn[](2);
-      isInner=true;
-      operands[1] = _differentiate(self.composedWith[0], isInner);
-      return newFn(operands, BinaryOp.MULTIPLY); 
-    }
-    return operands[0];
+    return _differentiate(self); 
   }
 
-  function _differentiate(fn memory self, bool isInner) private pure returns(fn memory) {
-    require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
+  function _differentiate(fn memory self/*, bool isInner*/) private pure returns(fn memory) {
+    // FIXME update with new representation require(!(isInner && self.composedWith.length>0), "composition depth not yet supported.");
     if (self.form > Form.POLYNOMIAL)
       return _differentiateTranscendental(self);
     if (self.form == Form.POLYNOMIAL)
@@ -221,13 +213,18 @@ library Calculus {
   // TODO test correctness
   function _differentiateBinaryOp(fn memory self) private pure returns(fn memory) {
     fn[] memory dfs = new fn[](2);
-    dfs[0] = differentiate(self.operands[0]);
-    dfs[1] = differentiate(self.operands[1]);
+    dfs[0] = differentiate(self.operands[0]); // f'
+    dfs[1] = differentiate(self.operands[1]); // g'
+    fn[] memory factors0 = new fn[](2);
+    if (self.op == BinaryOp.COMPOSITION) {
+      factors0[0] = dfs[1]; // g'
+      factors0[1] = compose(dfs[0], self.operands[1]); // f'(g)
+      return newFn(dfs, BinaryOp.MULTIPLY);
+    }
     if (self.op < BinaryOp.MULTIPLY) { // +,-
       // d op = op d
       return newFn(dfs, self.op); 
     } 
-    fn[] memory factors0 = new fn[](2);
     factors0[0] = self.operands[0];
     factors0[1] = dfs[1]; 
     fn[] memory factors1 = new fn[](2);
