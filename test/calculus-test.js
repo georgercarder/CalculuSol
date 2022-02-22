@@ -28,7 +28,7 @@ describe("TestCalculus", function () {
     for (let i=0; i<coefficients.length; i++) {
       evaluatedPolynomial = evaluatedPolynomial.add(bn(coefficients[i]).mul(bn(input).pow(bn(i))))
     }
-    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(evaluatedPolynomial);
+    expect((await testCalculus.testPolynomialEvaluation(coefficients, input, one)).value).to.equal(evaluatedPolynomial);
 
     input = 25777000; // input is a rational
     // 2.5777
@@ -36,7 +36,7 @@ describe("TestCalculus", function () {
     for (let i=0; i<coefficients.length; i++) {
       coefficients[i] = bn(coefficients[i]).mul(one);
     }
-    expect(await testCalculus.testPolynomialEvaluation(coefficients, input, one)).to.equal(bn(7575925516)); // "close" according to wolfram alpha 757.593
+    expect((await testCalculus.testPolynomialEvaluation(coefficients, input, one)).value).to.equal(bn(7575925516)); // "close" according to wolfram alpha 757.593
     //
     let FORM = {BINARYOP:0, POLYNOMIAL:1, SIN:2, COS:3, EXP:4} // etc
     
@@ -93,34 +93,34 @@ describe("TestCalculus", function () {
     input = 0;
     let accuracy = 12; 
     res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, scalar, input, accuracy);
-    expect(res).to.equal(0); // sanity
+    expect(res.value).to.equal(0); // sanity
     input = pi;
     res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, scalar, input, accuracy);
-    expect(res).to.equal(-32594033); // sanity ("close" to zero ) // -0.000000000032594033    
+    expect(res.value).to.equal(-32594033); // sanity ("close" to zero ) // -0.000000000032594033    
     input = 0;
     res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, scalar, input, accuracy);
-    expect(res).to.equal(one); // sanity
+    expect(res.value).to.equal(one); // sanity
     input = pi;
     res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, scalar, input, accuracy);
-    expect(res).to.equal(bn("-1000000003423230545")); // sanity ("close" to -1)
+    expect(res.value).to.equal(bn("-1000000003423230545")); // sanity ("close" to -1)
     let piHalves = bn(piString).div(2).mul(one).div(bn(10).pow(36));
     let threePiHalves = bn(piString).mul(3).div(2).mul(one).div(bn(10).pow(36));
     input = piHalves;
     res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, scalar, input, accuracy);
-    expect(res).to.equal(bn("1000000000000000166")); // sanity ("close" to one)
+    expect(res.value).to.equal(bn("1000000000000000166")); // sanity ("close" to one)
     input = threePiHalves; 
 
     res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, scalar, input, accuracy);
-    expect(res).to.equal("-1000001333538651277"); // sanity ("close" to -1)
+    expect(res.value).to.equal("-1000001333538651277"); // sanity ("close" to -1)
     //                     -682941969615792847 513603717600817265
 
     input = piHalves;
     res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, scalar, input, accuracy);
-    expect(res).to.equal(-3598); // sanity ("close" to zero)
+    expect(res.value).to.equal(-3598); // sanity ("close" to zero)
     
     input = threePiHalves; 
     res = await testCalculus.testTranscendentalEvaluation(FORM.COS, one, scalar, input, accuracy);
-    expect(res).to.equal("-11224909331762"); // sanity ("close" to 0) //  -0.000011224909331762
+    expect(res.value).to.equal("-11224909331762"); // sanity ("close" to 0) //  -0.000011224909331762
     
     // TODO find methods to get better accuracy
 
@@ -129,12 +129,12 @@ describe("TestCalculus", function () {
     // e^x
     input = 0;
     res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, scalar, input, accuracy);
-    expect(res).to.equal(one);
+    expect(res.value).to.equal(one);
 
     input = one;
     let EApproximate = bn('2718281826198492860');
     res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, scalar, input, accuracy);
-    expect(res).to.equal(EApproximate);
+    expect(res.value).to.equal(EApproximate);
 
   
     // test composition
@@ -150,7 +150,7 @@ describe("TestCalculus", function () {
     input = bn(10).mul(ones[1]); // in terms of g.one
     // composition of polynomial with polynomial
     res = await testCalculus.testComposition(ones, coefficients, scalars, input, accuracy);
-    expect(res).to.equal(bn("671378855395602781000"));
+    expect(res.value).to.equal(bn("671378855395602781000"));
     // using Geogebra for validation
     // https://www.geogebra.org/calculator
     //
@@ -166,7 +166,7 @@ describe("TestCalculus", function () {
       }
     }
     res = await testCalculus.testDifferentiateComposition(ones, coefficients, scalars, input, accuracy);
-    console.log(res);
+    console.log(res.value);
     // want 2977091628*ones[0]
   });
 });

@@ -51,8 +51,13 @@ library Calculus {
     int[] memory blank_;
     return fn(Form.BINARYOP, 0, blank_, operands, op, 0); 
   }
+
+  struct Number {
+    int value;
+    uint one;
+  } 
   
-  function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(int) {
+  function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(Number memory) {
     if (self.form == Form.BINARYOP)
       return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
     if (self.form == Form.POLYNOMIAL)
@@ -62,14 +67,14 @@ library Calculus {
   }
 
   // evaluates polynomial having rational input and coeffiecients 
-  function evaluate(fn memory self, int input) internal pure returns(int) {
+  function evaluate(fn memory self, int input) internal pure returns(Number memory) { //returns(int) {
     require(self.form == Form.POLYNOMIAL, "form must be polynomial.");
     return _evaluatePolynomial(self, input);
   }
 
   enum QuotientType {NONE, FACTORIAL, FACTOR}
 
-  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(int) {
+  function _evaluateTranscendental(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(Number memory) {
     int[] memory coefficients = new int[](2*accuracy+1);
     QuotientType qt = QuotientType.NONE;
     uint startIdx;
@@ -123,7 +128,7 @@ library Calculus {
   }
 
   // assumes input, and coefficients are rationals Q
-  function _evaluatePolynomial(fn memory self, int input) private pure returns(int) {
+  function _evaluatePolynomial(fn memory self, int input) private pure returns(Number memory) { 
     uint coefLen = self.coefficients.length;
     int lastPower = int(self.one);
     int power;
@@ -134,38 +139,37 @@ library Calculus {
       lastPower = power;
     }
     ret = ret / int(self.one);
-    return self.scalar * ret;
+    return Number(self.scalar * ret, self.one);
   }
 
   // TODO test correctness
-  function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(int) {
+  function _evaluateBinaryOperation(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) private pure returns(Number memory) {
     require(self.op > BinaryOp.NONE && self.op <= BinaryOp.DIVIDE, "BinaryOp undefined.");
-    int res0;
-    int res1;
-    res1 = evaluate(self.operands[1], input, accuracy, factorialReciprocalsLookupTable);
+    Number memory res1 = evaluate(self.operands[1], input, accuracy, factorialReciprocalsLookupTable);
     if (self.op == BinaryOp.COMPOSITION) {
-      res1 = res1 * int(self.operands[0].one) / int(self.operands[1].one); // normalize
-      return evaluate(self.operands[0], res1, accuracy, factorialReciprocalsLookupTable); 
+      res1.value = res1.value * int(self.operands[0].one) / int(res1.one); // normalize
+      return evaluate(self.operands[0], res1.value, accuracy, factorialReciprocalsLookupTable); 
     }
-    res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
-    (res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
+    Number memory res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
+    //(res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
+    (res0, res1) = _normalizeWRTOnes(res0, res1);
     if (self.op == BinaryOp.ADD) {
-      return res0 + res1;
+      return Number(res0.value + res1.value, res0.one);
     }
     if (self.op == BinaryOp.SUBTRACT) {
-      return res0 - res1;
+      return Number(res0.value - res1.value, res0.one);
     }
     if (self.op == BinaryOp.MULTIPLY) {
-      return res0 * res1;
+      return Number(res0.value * res1.value, res0.one);
     } // else if fn.op == BinaryOp.DIVIDE
-    return res0 / res1;
+    return Number(res0.value / res1.value, res0.one);
   }
 
-  function _normalizeWRTOnes(int value0, uint one0, int value1, uint one1) private pure returns(int, int) {
-    if (one0==one1) return (value0, value1);
-    if (one0 < one1) 
-      return (int(one1)*value0/int(one0), value1); 
-    return (value0, int(one0)*value1/int(one1));
+  function _normalizeWRTOnes(Number memory n0, Number memory n1) private pure returns(Number memory, Number memory) {
+    if (n0.one==n1.one) return (n0, n1);
+    if (n0.one < n1.one) 
+      return (Number(int(n1.one)*n0.value/int(n0.one), n1.one), n1); 
+    return (n0, Number(int(n0.one)*n1.value/int(n1.one), n0.one));
   }
 
   function compose(fn memory self, fn memory other) internal pure returns(fn memory) {
@@ -173,7 +177,7 @@ library Calculus {
     operands[0] = self;
     operands[1] = other;
     fn memory f = newFn(operands, BinaryOp.COMPOSITION); 
-    f.one = operands[0].one;
+    //f.one = operands[0].one; // FIXME
     return f;
   }
 
