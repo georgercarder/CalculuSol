@@ -138,7 +138,6 @@ describe("TestCalculus", function () {
 
   
     // test composition
-    //
     let ones = [bn(1000), bn(100000)];
     coefficients = [[915, -10, 777], [-5401, 97, 53, -5556]];
     for (let i=0; i<coefficients.length; i++) {
@@ -147,12 +146,27 @@ describe("TestCalculus", function () {
         coefficients[i][j] = bn(coefficients[i][j]).mul(ones[i]);
       }
     }
-    let forms = [FORM.POLYNOMIAL, FORM.POLYNOMIAL];
     let scalars = [7, -2]; // for now
     input = bn(10).mul(ones[1]); // in terms of g.one
     // composition of polynomial with polynomial
-    res = await testCalculus.testComposition(ones, coefficients, forms, scalars, input, accuracy);
+    res = await testCalculus.testComposition(ones, coefficients, scalars, input, accuracy);
     expect(res).to.equal(bn("671378855395602781000"));
-   
+    // using Geogebra for validation
+    // https://www.geogebra.org/calculator
+    //
+    // let forms = [FORM.POLYNOMIAL, FORM.POLYNOMIAL];
+
+    // found bug
+    // // FIXME when f is of degree > 1, this is far off!!
+    coefficients = [[915, -10, -44], [-5401, 97, 20]];
+    for (let i=0; i<coefficients.length; i++) {
+      let c = coefficients[i];
+      for (let j=0; j<c.length; j++) {
+        coefficients[i][j] = bn(coefficients[i][j]).mul(ones[i]);
+      }
+    }
+    res = await testCalculus.testDifferentiateComposition(ones, coefficients, scalars, input, accuracy);
+    console.log(res);
+    // want 2977091628*ones[0]
   });
 });

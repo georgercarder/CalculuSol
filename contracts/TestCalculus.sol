@@ -42,12 +42,21 @@ contract TestCalculus {
     return Calculus.evaluate(f, input, accuracy, frt);
   }
 
-  function testComposition(uint[] calldata ones, int[][] calldata coefficients, Calculus.Form[] calldata forms, int[] calldata scalars, int input, uint accuracy) external pure returns(int) {
+  function testComposition(uint[] calldata ones, int[][] calldata coefficients, int[] calldata scalars, int input, uint accuracy) external pure returns(int) {
     Calculus.fn memory f = Calculus.newFn(coefficients[0], scalars[0], ones[0]);
     Calculus.fn memory g = Calculus.newFn(coefficients[1], scalars[1], ones[1]);
     Calculus.fn memory fog = Calculus.compose(f, g);
     uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(2*accuracy);
     return Calculus.evaluate(fog, input, accuracy, frt);
+  }
+
+  function testDifferentiateComposition(uint[] calldata ones, int[][] calldata coefficients, int[] calldata scalars, int input, uint accuracy) external pure returns(int) {
+    Calculus.fn memory f = Calculus.newFn(coefficients[0], scalars[0], ones[0]);
+    Calculus.fn memory g = Calculus.newFn(coefficients[1], scalars[1], ones[1]);
+    Calculus.fn memory fog = Calculus.compose(f, g);
+    uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(2*accuracy);
+    Calculus.fn memory dfog = Calculus.differentiate(fog);
+    return Calculus.evaluate(dfog, input, accuracy, frt);
   }
 
 }
