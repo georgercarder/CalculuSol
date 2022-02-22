@@ -64,7 +64,6 @@ contract TestCalculus {
     require(dfog.operands[1].operands[0].one == ones[0], "f'.one");
     require(dfog.operands[1].operands[1].one == ones[1], "g.one");
 
-    // FIXME failing here
     return Calculus.evaluate(dfog, input, accuracy, frt);
   }
 
