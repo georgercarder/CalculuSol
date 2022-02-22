@@ -176,9 +176,7 @@ library Calculus {
     fn[] memory operands = new fn[](2);
     operands[0] = self;
     operands[1] = other;
-    fn memory f = newFn(operands, BinaryOp.COMPOSITION); 
-    //f.one = operands[0].one; // FIXME
-    return f;
+    return newFn(operands, BinaryOp.COMPOSITION); 
   }
 
   function differentiate(fn memory self) internal pure returns(fn memory) {
