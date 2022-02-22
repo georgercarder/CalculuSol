@@ -138,16 +138,21 @@ describe("TestCalculus", function () {
 
   
     // test composition
-    //function testComposition(uint one0, int[] calldata coefficients0, Calculus.Form f1, uint one1, int scalar1, int input, uint accuracy) external pure returns(int[] memory) {
-    
-    coefficients = [-91504, 1482, -81492, 1204];
+    //
+    let ones = [bn(1000), bn(100000)];
+    coefficients = [[915, -10, 777], [-5401, 97, 53, -5556]];
     for (let i=0; i<coefficients.length; i++) {
-      coefficients[i] = bn(coefficients[i]).mul(one);
+      let c = coefficients[i];
+      for (let j=0; j<c.length; j++) {
+        coefficients[i][j] = bn(coefficients[i][j]).mul(ones[i]);
+      }
     }
-    scalar = -2;
-    input = -123;
-    res = await testCalculus.testComposition(one, coefficients, FORM.SIN, one.mul(100), scalar, input, accuracy);
-    console.log(res);
-    
+    let forms = [FORM.POLYNOMIAL, FORM.POLYNOMIAL];
+    let scalars = [7, -2]; // for now
+    input = bn(10).mul(ones[1]); // in terms of g.one
+    // composition of polynomial with polynomial
+    res = await testCalculus.testComposition(ones, coefficients, forms, scalars, input, accuracy);
+    expect(res).to.equal(bn("671378855395602781000"));
+   
   });
 });
