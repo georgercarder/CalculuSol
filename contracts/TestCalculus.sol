@@ -56,6 +56,15 @@ contract TestCalculus {
     Calculus.fn memory fog = Calculus.compose(f, g);
     uint[] memory frt = LookupTables.buildFactorialReciprocalsLookupTable(2*accuracy);
     Calculus.fn memory dfog = Calculus.differentiate(fog);
+
+    // debug
+    require(dfog.op == Calculus.BinaryOp.MULTIPLY, "op.MULTIPLY g'*f'(g)");
+    require(dfog.operands[0].one == ones[1], "g'.one");
+    require(dfog.operands[1].op == Calculus.BinaryOp.COMPOSITION, "op(f'(g)) == COMPOSITION");
+    require(dfog.operands[1].operands[0].one == ones[0], "f'.one");
+    require(dfog.operands[1].operands[1].one == ones[1], "g.one");
+
+    // FIXME failing here
     return Calculus.evaluate(dfog, input, accuracy, frt);
   }
 
