@@ -160,9 +160,9 @@ library Calculus {
       return Number(res0.value - res1.value, res0.one);
     }
     if (self.op == BinaryOp.MULTIPLY) {
-      return Number(res0.value * res1.value, res0.one);
+      return Number(res0.value * res1.value / int(res0.one), res0.one);
     } // else if fn.op == BinaryOp.DIVIDE
-    return Number(res0.value / res1.value, res0.one);
+    return Number(int(res0.one) * res0.value / res1.value, res0.one);
   }
 
   function _normalizeWRTOnes(Number memory n0, Number memory n1) private pure returns(Number memory, Number memory) {

@@ -157,7 +157,6 @@ describe("TestCalculus", function () {
     // let forms = [FORM.POLYNOMIAL, FORM.POLYNOMIAL];
 
     // found bug
-    // // FIXME when f is of degree > 1, this is far off!!
     coefficients = [[915, -10, -44], [-5401, 97, 20]];
     for (let i=0; i<coefficients.length; i++) {
       let c = coefficients[i];
@@ -166,7 +165,7 @@ describe("TestCalculus", function () {
       }
     }
     res = await testCalculus.testDifferentiateComposition(ones, coefficients, scalars, input, accuracy);
-    console.log(res.value);
-    // want 2977091628*ones[0]
+    expect(res.value).to.equal(bn("2977091628").mul(ones[1]));
+    // from geogebra
   });
 });
