@@ -17,7 +17,7 @@ library Calculus {
 
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
-  enum Form {BINARYOP, POLYNOMIAL, SIN, COS, EXP, LN} // etc
+  enum Form {BINARYOP, POLYNOMIAL, SIN, COS, EXP, LN, CONSTANT} // etc
   enum BinaryOp {NONE, COMPOSITION, ADD, SUBTRACT, MULTIPLY, DIVIDE}
 
   // transcendental
@@ -180,6 +180,10 @@ library Calculus {
   }
 
   function differentiate(fn memory self) internal pure returns(fn memory) {
+    if (self.form == Form.CONSTANT) {
+      int[] memory coefficients = new int[](1); // 0
+      return newFn(coefficients, self.one); // f(x) = 0
+    }
     if (self.form > Form.POLYNOMIAL)
       return _differentiateTranscendental(self);
     if (self.form == Form.POLYNOMIAL)
@@ -244,8 +248,20 @@ library Calculus {
     return newFn(operands, BinaryOp.DIVIDE);
   }
 
-  /*
-  function integrate(fn self) external returns(fn);
- */
+  function generalAntiderivative(fn memory self) internal pure returns(fn memory) {
+    /*if (self.form == Form.CONSTANT) {
+      // TODO
+    }
+    if (self.form > Form.POLYNOMIAL)
+      return  // TODO
+    if (self.form == Form.POLYNOMIAL)
+      return // TODO 
+    return // TODO 
+    */
+  }
+
+  function definiteIntegral(fn memory self, int[] memory boundary) internal pure returns(fn memory) {
+    // TODO
+  }
 
 }
