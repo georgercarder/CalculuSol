@@ -8,7 +8,7 @@ library LookupTables {
   function buildFactorReciprocalsLookupTable(uint len) internal pure returns(uint[] memory ret) {
     ret = new uint[](len); 
     ret[0] = one;
-    for (uint i=1; i<=len; i++) {
+    for (uint i=1; i<len; i++) {
       ret[i] = one / i;
     }
     return ret;

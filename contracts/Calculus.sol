@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Math.sol";
+//import "./Math.sol";
 import "./LookupTables.sol";
 
 library Calculus {
@@ -93,10 +93,9 @@ library Calculus {
     } else if (self.form == Form.LN) {
       qt = QuotientType.FACTOR; 
       input = input - int(self.one);
-      require(Math.abs(input) < int(self.one), "input out of domain.");
+      require(input >= 0, "input out of domain."); // TODO double check this
       accuracy = 2*accuracy;
       startIdx = 1;
-      idxGap=2;
       unit=-1;
       // TODO update unit test for LN
     }
@@ -151,7 +150,6 @@ library Calculus {
       return evaluate(self.operands[0], res1.value, accuracy, factorialReciprocalsLookupTable); 
     }
     Number memory res0 = evaluate(self.operands[0], input, accuracy, factorialReciprocalsLookupTable);
-    //(res0, res1) = _normalizeWRTOnes(res0, self.operands[0].one, res1, self.operands[1].one);
     (res0, res1) = _normalizeWRTOnes(res0, res1);
     if (self.op == BinaryOp.ADD) {
       return Number(res0.value + res1.value, res0.one);
@@ -193,7 +191,6 @@ library Calculus {
 
   // FIXME handle LN
   function _differentiateTranscendental(fn memory self) private pure returns(fn memory) {
-    // composition is handled by _differentiate
     if (self.form == Form.SIN) {
       return newFn(Form.COS, self.one, self.scalar); 
     } else if (self.form == Form.COS) {
@@ -204,7 +201,6 @@ library Calculus {
   }
 
   function _differentiatePolynomial(fn memory self) private pure returns(fn memory) {
-    // composition is handled by _differentiate
     uint coefLen = self.coefficients.length;
     int[] memory coefficients = new int[](coefLen-1);
     for (uint i=0; i<coefLen-1; i++) {

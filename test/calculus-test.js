@@ -37,8 +37,8 @@ describe("TestCalculus", function () {
       coefficients[i] = bn(coefficients[i]).mul(one);
     }
     expect((await testCalculus.testPolynomialEvaluation(coefficients, input, one)).value).to.equal(bn(7575925516)); // "close" according to wolfram alpha 757.593
-    //
-    let FORM = {BINARYOP:0, POLYNOMIAL:1, SIN:2, COS:3, EXP:4} // etc
+    
+    let FORM = {BINARYOP:0, POLYNOMIAL:1, SIN:2, COS:3, EXP:4, LN:5} // etc
     
     // check differentiation
     expected = [FORM.POLYNOMIAL, bn(1), bn(20), bn(6), bn(120), one];
@@ -91,7 +91,9 @@ describe("TestCalculus", function () {
     let piString = '3141592653589793238462643383279502884';
     let pi = bn(piString).mul(one).div(bn(10).pow(36));
     input = 0;
+    
     let accuracy = 12; 
+    
     res = await testCalculus.testTranscendentalEvaluation(FORM.SIN, one, scalar, input, accuracy);
     expect(res.value).to.equal(0); // sanity
     input = pi;
@@ -136,6 +138,17 @@ describe("TestCalculus", function () {
     res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, scalar, input, accuracy);
     expect(res.value).to.equal(EApproximate);
 
+    // TODO test for ln(x)
+    // // FIXME figure out the LN bug
+    /*one = bn(1000)
+    input = 2.718;
+    input = input*(10**3);
+    res = await testCalculus.testTranscendentalEvaluation(FORM.LN, one, scalar, input, accuracy);
+    console.log(res);
+    console.log(res.value.toString().length, one.toString().length);
+    */
+    //console.log(parseInt(res.value)/parseInt(res.one));
+
   
     // test composition
     let ones = [bn(1000), bn(100000)];
@@ -156,7 +169,6 @@ describe("TestCalculus", function () {
     //
     // let forms = [FORM.POLYNOMIAL, FORM.POLYNOMIAL];
 
-    // found bug
     coefficients = [[915, -10, -44], [-5401, 97, 20]];
     for (let i=0; i<coefficients.length; i++) {
       let c = coefficients[i];
@@ -167,5 +179,21 @@ describe("TestCalculus", function () {
     res = await testCalculus.testDifferentiateComposition(ones, coefficients, scalars, input, accuracy);
     expect(res.value).to.equal(bn("2977091628").mul(ones[1]));
     // from geogebra
+  
+    // function testDifferentiateCompositionMixed(uint[] calldata ones, int[] calldata coefficients, Calculus.Form form, int[] calldata scalars, int input, uint accuracy) external pure returns(Calculus.Number memory) 
+
+    coefficients = [915, -10, -44, 22];
+    for (let i=0; i<coefficients.length; i++) {
+      coefficients[i] = bn(coefficients[i]).mul(ones[0]); // in  terms of f.one
+    }
+    input = ones[1]; // in terms of g.one
+    //scalars = [1, 1];
+    //accuracy = 24;
+    res = await testCalculus.testDifferentiateCompositionMixed(ones, coefficients, FORM.SIN, scalars, input, accuracy);
+    expect(res.value).to.equal(bn("-245632266"));
+    // -2458.604504 from geogebra
+    // -245632266
+    
+
   });
 });
