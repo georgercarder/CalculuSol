@@ -138,16 +138,20 @@ describe("TestCalculus", function () {
     res = await testCalculus.testTranscendentalEvaluation(FORM.EXP, one, scalar, input, accuracy);
     expect(res.value).to.equal(EApproximate);
 
-    // TODO test for ln(x)
-    // // FIXME figure out the LN bug
-    /*one = bn(1000)
-    input = 2.718;
-    input = input*(10**3);
+    input = one.div(2); // 1/2
     res = await testCalculus.testTranscendentalEvaluation(FORM.LN, one, scalar, input, accuracy);
-    console.log(res);
-    console.log(res.value.toString().length, one.toString().length);
-    */
-    //console.log(parseInt(res.value)/parseInt(res.one));
+    expect(res.value).to.equal("-693147175777781009");
+
+    input = one;
+    res = await testCalculus.testTranscendentalEvaluation(FORM.LN, one, scalar, input, accuracy);
+    expect(res.value).to.equal(0); 
+
+    input = one.mul(2);
+    res = await testCalculus.testTranscendentalEvaluation(FORM.LN, one, scalar, input, accuracy);
+    expect(res.value).to.equal(bn("714414166209495325")); // geogebra gives 0.69314... so this is a bit off
+    input = one.div(7);
+    res = await testCalculus.testTranscendentalEvaluation(FORM.LN, one, scalar, input, accuracy);
+    expect(res.value).to.equal(bn("-1939927684743857041")); // geogebra gives -1.945... so is close
 
   
     // test composition

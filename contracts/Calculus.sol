@@ -92,12 +92,14 @@ library Calculus {
       // it's really lovely the many ways EXP is composed with SIN,COS in both R, C :)
     } else if (self.form == Form.LN) {
       qt = QuotientType.FACTOR; 
+      // the Maclaurin series we use is ln(1+x) so shift the input
       input = input - int(self.one);
-      require(input >= 0, "input out of domain."); // TODO double check this
+      // the Maclaurin series we use is ln(1+x) but only converges for (-1,1] 
+      require(-int(self.one) < input && input <=int(self.one), "input out of domain.");
+      // TODO make the domain check above instead branch to other methods of computing ln(x)...
       accuracy = 2*accuracy;
       startIdx = 1;
       unit=-1;
-      // TODO update unit test for LN
     }
     uint[] memory lookupTable = factorialReciprocalsLookupTable;
     if (qt == QuotientType.FACTOR) {
