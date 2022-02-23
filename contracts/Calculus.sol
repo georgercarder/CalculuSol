@@ -5,14 +5,14 @@ import "./LookupTables.sol";
 
 library Calculus {
 
-  struct fn {
-    Form form; // transcendental, polynomial, etc
+  struct fn { // fn will always mean "function" 
+    Form form;
     int scalar;
     int[] coefficients;
     fn[] operands;
     BinaryOp op;
     uint one;
-  }
+  } // TODO put a mechanism to restrict domain in the fn, see d/dx ln(x) = 1/x
 
   uint constant PI = 3141592653589793238462643383279502884; // to 36 decimal places
 
@@ -190,13 +190,24 @@ library Calculus {
     return _differentiateBinaryOp(self);
   }
 
-  // FIXME handle LN
   function _differentiateTranscendental(fn memory self) private pure returns(fn memory) {
     if (self.form == Form.SIN) {
       return newFn(Form.COS, self.one, self.scalar); 
     } else if (self.form == Form.COS) {
       return newFn(Form.SIN, self.one, -self.scalar); 
-    } // ETC
+    } else if (self.form == Form.LN) {
+      // this should add a restriction to the domain...
+      // TODO put a mechanism to restrict domain in the fn
+      fn[] memory operands = new fn[](2);
+      int[] memory coefficients0 = new int[](1);
+      coefficients0[0] = int(self.one);
+      operands[0] = newFn(coefficients0, self.one); // f(x) = 1
+      int[] memory coefficients1 = new int[](2);
+      coefficients1[1] = int(self.one);
+      operands[1] = newFn(coefficients1, self.one); // g(x) = x
+      return newFn(operands, BinaryOp.DIVIDE); // f/g = 1/x
+      // TODO test
+    } 
     // case EXP
     return self;
   }
