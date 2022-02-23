@@ -180,10 +180,6 @@ library Calculus {
   }
 
   function differentiate(fn memory self) internal pure returns(fn memory) {
-    return _differentiate(self); 
-  }
-
-  function _differentiate(fn memory self) private pure returns(fn memory) {
     if (self.form > Form.POLYNOMIAL)
       return _differentiateTranscendental(self);
     if (self.form == Form.POLYNOMIAL)
