@@ -260,7 +260,7 @@ library Calculus {
     */
   }
 
-  function definiteIntegral(fn memory self, int[] memory boundary) internal pure returns(fn memory) {
+  function definiteIntegral(fn memory self, int[] memory boundary) internal pure returns(Number memory) {
     // TODO
   }
 
