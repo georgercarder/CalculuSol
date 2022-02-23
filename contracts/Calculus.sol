@@ -57,6 +57,7 @@ library Calculus {
   } 
   
   function evaluate(fn memory self, int input, uint accuracy, uint[] memory factorialReciprocalsLookupTable) internal pure returns(Number memory) {
+    require(self.form != Form.CONSTANT, "cannot evaluate a constant form.");
     if (self.form == Form.BINARYOP)
       return _evaluateBinaryOperation(self, input, accuracy, factorialReciprocalsLookupTable);
     if (self.form == Form.POLYNOMIAL)
